@@ -1,0 +1,510 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap");
+
+:root {
+    /* Base */
+    --background: #F7F6F0;
+    --surface: #FFFFFF;
+    --text: #292D27;
+    --muted: #777B72;
+    --border: #E5E5DC;
+
+    /* Brand palette */
+    --lavender: #D2C4DF;
+    --plum: #4A3C51;
+    --sage: #A9BA9D;
+    --sage-light: #DCE5D5;
+
+    /* Supporting colors */
+    --sage-dark: #53664D;
+    --accent: #D2C4DF;
+
+    /* Typography */
+    --font-body: 'DM Sans', sans serif;
+    --font-editorial: 'Cormorant Garamond', serif;
+
+    /* Layout */
+    --page-padding: 13px;
+    --card-radius: 0px;
+    --soft-radius: 2px;
+}
+
+/* Global styles */
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    padding: 16px var(--page-padding) 90px;
+    background-color: var(--background);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 12px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button {
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+}
+
+button,
+a {
+    -webkit-tap-highlight-color: transparent;
+}
+/* Brand header */
+.brand-heading {
+    height: 40px;
+    background-color: #D9D9D9;
+    display: flex;
+    align-items: center;
+    padding: 0 22px;
+}
+
+.brand-heading h1 {
+    margin: 0;
+    font-family: var(--font-editorial);
+    font-size: 19px;
+    font-weight: 600;
+    font-style: italic;
+    letter-spacing: 1.2px;
+}
+
+/* Date and Location */
+.date-location {
+    padding: 8px 2px 13px;
+}
+
+.current-date {
+    margin-bottom: 12px;
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: 0.15px;
+}
+
+.location {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.1px;
+}
+
+.location span {
+    font-size: 15px;
+    font-weight: 400;
+}
+
+/* Weather Card */
+.weather-card {
+    margin-bottom: 19px;
+    padding: 15px 14px;
+    min-height: 145px;
+    background-color: var(--lavender);
+    border-radius: var(--card-radius);
+}
+
+.weather-card h2 {
+    margin-bottom: 13px;
+    font-size: 24px;
+    font-weight: 500;
+}
+
+.weather-content {
+    display: grid;
+    grid-template-columns: 55px minmax(0, 1fr) 105px;
+    align-items: center;
+    gap: 8px;
+}
+
+.weather-left {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.weather-icon {
+    font-size: 31px;
+}
+
+.weather-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.temperature {
+    display: flex;
+    align-items: baseline;
+    gap: 3px;
+    white-space: nowrap;
+    font-family: var(--font-editorial);
+    font-size: 32px;
+    font-weight: 500;
+    letter-spacing: -0.8px;
+}
+
+.temperature-unit {
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0;
+}
+
+.unit-divider {
+    padding: 0 2px;
+    color: var(--muted);
+    font-family: var(--font-body);
+    font-size: 11px;
+}
+
+.weather-right {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.metric-item {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.label {
+    color: var(--muted);
+    font-size: 9px;
+    line-height: 1.3;
+}
+
+.value {
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* Outfit Recommendation */
+.outfit-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 26px;
+}
+
+.recommendation-action {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    min-height: 115px;
+    overflow: hidden;
+    background-color: var(--sage);
+    border-radius: var(--card-radius);
+}
+
+.recommendation-illustration {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 115px;
+    color: var(--sage-dark);
+    font-size: 55px;
+}
+
+.recommendation-copy {
+    position: relative;
+    padding: 12px;
+}
+
+.recommendation-copy h2 {
+    max-width: 130px;
+    margin-bottom: 12px;
+    font-size: 27px;
+    line-height: 0.98;
+    font-weight: 500;
+}
+
+.action-arrow {
+    font-size: 20px;
+}
+
+.wardrobe-shortcuts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.shortcut-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    min-height: 76px;
+    padding: 12px;
+    border-radius: var(--soft-radius);
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.add-garment {
+    background-color: var(--plum);
+    color: var(--surface);
+}
+
+.my-wardrobe {
+    background-color: var(--sage-light);
+    color: var(--text);
+}
+
+.shortcut-icon {
+    font-size: 20px;
+    line-height: 1;
+}
+
+/* Occasion Recommendations */
+.occasion-section {
+    margin-bottom: 25px;
+}
+
+.section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.section-heading h2 {
+    margin-bottom: 0;
+    font-size: 25px;
+    line-height: 1.05;
+}
+
+.refresh-button {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 29px;
+    height: 29px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background-color: transparent;
+    font-size: 19px;
+}
+
+.occasion-filters {
+    display: flex;
+    gap: 7px;
+    margin-bottom: 14px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.occasion-filters::-webkit-scrollbar {
+    display: none;
+}
+
+.occasion-button {
+    flex-shrink: 0;
+    padding: 7px 11px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background-color: transparent;
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+.occasion-button.active {
+    border-color: var(--plum);
+    background-color: var(--plum);
+    color: var(--surface);
+}
+
+.outfit-cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.outfit-card {
+    min-width: 0;
+}
+
+.outfit-image {
+    display: flex;
+    align-items: flex-end;
+    height: 145px;
+    padding: 8px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    background-color: var(--sage-light);
+    border-radius: var(--card-radius);
+}
+
+.outfit-image span {
+    font-size: 8px;
+    letter-spacing: 1px;
+}
+
+.outfit-image-one {
+    background-color: #DCE5D5;
+}
+
+.outfit-image-two {
+    background-color: #E4DCE9;
+}
+
+.outfit-image-three {
+    background-color: #E5E1D6;
+}
+
+.outfit-card h3 {
+    margin-bottom: 3px;
+    font-family: var(--font-editorial);
+    font-size: 17px;
+    line-height: 1.1;
+    font-weight: 600;
+}
+
+.outfit-card p {
+    margin-bottom: 0;
+    color: var(--muted);
+    font-size: 10px;
+}
+
+/* Mood and Circularity */
+.feature-panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.feature-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    min-height: 145px;
+    padding: 14px 12px;
+    border-radius: var(--card-radius);
+}
+
+.mood-panel {
+    background-color: var(--sage-light);
+}
+
+.circularity-panel {
+    background-color: var(--lavender);
+}
+
+.feature-eyebrow {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+}
+
+.feature-panel h2 {
+    max-width: 135px;
+    margin: 20px 0;
+    font-family: var(--font-editorial);
+    font-size: 26px;
+    line-height: 0.98;
+    font-weight: 500;
+}
+
+.feature-arrow {
+    align-self: flex-end;
+    font-size: 18px;
+}
+
+/* Bottom Navigation */
+.navbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    min-height: 64px;
+    padding: 10px 12px;
+    border-top: 1px solid var(--border);
+    background-color: var(--surface);
+}
+
+.logo {
+    flex-shrink: 0;
+    font-family: var(--font-editorial);
+    font-size: 15px;
+    font-weight: 600;
+    font-style: italic;
+    letter-spacing: 0.4px;
+}
+
+.navbar nav {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.navbar nav a {
+    color: var(--muted);
+    font-size: 9px;
+    white-space: nowrap;
+}
+
+.navbar nav a.active {
+    color: var(--text);
+    font-weight: 700;
+}
+
+.navbar nav .add-button {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: var(--plum);
+    color: var(--surface);
+    font-size: 20px;
+}
+
+/* Interaction States */
+a,
+button {
+    transition: opacity 0.2s ease,
+                background-color 0.2s ease;
+}
+
+a:hover,
+button:hover {
+    opacity: 0.8;
+}
+
+button:active {
+    opacity: 0.65;
+}
+
+button:focus-visible,
+a:focus-visible {
+    outline: 2px solid var(--sage-dark);
+    outline-offset: 3px;
+}

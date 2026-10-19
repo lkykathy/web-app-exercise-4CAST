@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name = "viewport" content="width=device-width, initial-scale=1.0">
+        <title>4CAST | Your Digital Wardrobe</title>
+        <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css')}}">
+        <script src="{{ url_for('static', filename='js/main.js')}}" defer></script> -->
+        <link rel="stylesheet" href="../static/css/styles.css">
+    </head>
+    <body>
+        <!-- Brand header -->
+        <header class="brand-heading">
+            <h1>4CAST</h1>
+        </header>
+
+        <!-- Date and location -->
+        <div class="date-location">
+            <p class="current-date">Sunday, October 18</p>
+            <a class="location" href="#">New York<span aria-hidden="true"></span></a>
+        </div>
+
+        <main class="page" id="home">
+
+            <!-- Weather forecast -->
+            <section class="weather-card" aria-labelledby="forecast-title">
+                <h2 id="forecast-title">Today's Forecast</h2>
+
+                <div class="weather-content">
+                    <div class="weather-left">
+                        <span class="weather-icon" aria-label="Rainy weather">🌧️</span>
+                    </div>
+
+                    <div class="weather-center">
+                        <div class="temperature">
+                            <span>72°</span>
+                            <span class="temperature-unit">F</span> 
+                            <span class="unit-divider">|</span>
+                            <span class="temperature-unit">°C</span> 
+                         </div>
+                    </div>
+
+                    <div class="weather-right">
+                        <div class="metric-item">
+                            <span class="label">Precipitation:</span>
+                            <span class="value">36%</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="label">Humidity:</span>
+                            <span class="value">80%</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="label">Wind:</span>
+                            <span class="value">12 mph</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Outfit recommendation and wardrobe shortcut -->
+             <section class="outfit-actions" aria-label="Wardrobe actions">
+
+                <a class="recommendation-action" href="#outfits">
+                    <div class="recommendation-illustration">
+                        <!-- Replace with generation -->
+                         <span aria-hidden="true">*</span>
+                    </div>
+
+                    <div class="recommendation-copy">
+                        <h2>Get outfit recommendations</h2>
+                        <span class="action-arrow" aria-hidden="true">↗</span>
+                    </div>
+                </a>
+
+                <div class="wardrobe-shortcuts">
+                    <a class="shortcut-card add-garment" href="#add-garment">
+                        <span class="shortcut-icon" aria-hidden="true">+</span>
+                        <span>Add a garment</span>
+                    </a>
+                    <a class="shortcut-card my-wardrobe" href="#wardrobe">
+                        <span class="shortcut-icon" aria-hidden="true">↗</span>
+                        <span>My wardrobe</span>
+                    </a>
+                </div>
+             </section>
+
+             <!-- Outfit recommendations by occasion -->
+              <section class="occasion-section" id="outfits" aria-labelledby="occasion-title">
+                <div class="section-heading">
+                    <h2 id="occasion-title">Outfits based on occasion</h2>
+                    <button class="refresh-button" type="button" aria-label="Refresh outfit recommendations">↻</button>
+                </div>
+
+                <div class="occasion-filters" aria-label="Choose an occasion">
+                    <button class="occasion-button active" type="button"
+                            aria-pressed="true">Casual</button>
+                    <button class="occasion-button" type="button"
+                            aria-pressed="false">Smart Casual</button>
+                    <button class="occasion-button" type="button"
+                            aria-pressed="false">Formal</button>
+                    <button class="occasion-button" type="button"
+                            aria-pressed="false">Cocktail</button>
+                </div>
+
+                <div class="outfit-cards">
+                    <article class="outfit-card">
+                        <div class="outfit-image outfit-image-one">
+                            <span>LOOK 01</span>
+                        </div>
+                        <h3>Everyday ease</h3>
+                        <p>Casual</p>
+                    </article>
+
+                    <article class="outfit-card">
+                        <div class="outfit-image outfit-image-two">
+                            <span>LOOK 02</span>
+                        </div>
+                        <h3>Soft structure</h3>
+                        <p>Smart Casual</p>
+                    </article>
+
+                    <article class="outfit-card">
+                        <div class="outfit-image outfit-image-three">
+                            <span>LOOK 03</span>
+                        </div>
+                        <h3>Modern classic</h3>
+                        <p>Casual</p>
+                    </article>
+                </div>
+
+              </section>
+
+              <!-- Mood and color feature -->
+               <section class="feature-panels" aria-label="Explore your style">
+
+                <a class="feature-panel mood-panel" href="#mood">
+                    <span class="feature-eyebrow">MOOD &amp; COLOR</span>
+                    <h2>Style for your mood</h2>
+                    <span class="feature-arrow" aria-hidden="true">↗</span>
+                </a>
+
+                <!-- Circularity feature -->
+                 <a class="feature-panel circularity-panel" id="circularity" href="#care">
+                    <span class="feature-eyebrow">CIRCULARITY</span>
+                    <h2>Care, repair, and reuse</h2>
+                    <span class="feature-arrow" aria-hidden="true">↗</span>
+                 </a>
+               </section>
+        </main>
+
+        <!-- Bottom navigation -->
+        <footer class="navbar">
+            <a class="logo" href="#home" aria-label="4CAST home">4CAST</a>
+
+            <nav aria-label="Main navigation">
+                <a class="active" href="#home" aria-current="page">home</a>
+                <a href="#wardrobe">wardrobe</a>
+                <a class="add-button" href="#add-garment" aria-label="Add a garment">+</a>
+                <a href="#outfits">outfits</a>
+                <a href="#circularity">circularity</a>
+            </nav>
+        </footer>
+    </body>
+</html>
