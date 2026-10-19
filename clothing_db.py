@@ -180,4 +180,14 @@ def delete_clothing(item_id):
     if object_id is None:
         return False
     return db.clothing_items.delete_one({"_id": object_id}).deleted_count == 1
+
+
+def sort_clothing(sort_by="created_at", descending=True):
+    allowed_fields = {"material", "color", "occasion", "category", "warmth_level"}
+    if sort_by not in allowed_fields:
+        raise ValueError(f"Can only sort by creation time, warmth level, material, category, color, and occasion. ")
+    direction = -1 if descending else 1
+    return list(db.clothing_items.find({}).sort([
+        (sort_by, direction), ("_id", direction)
+    ]))
         
