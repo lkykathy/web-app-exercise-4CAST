@@ -56,5 +56,5 @@ def serialize_document(value):
     if isinstance(value, list):
         return [serialize_document(item) for item in value]
     if isinstance(value, dict):
-        return {key:serialize_document(val) for key,val in value}
+        return {key:serialize_document(val) for key,val in value.items()}
     return value
