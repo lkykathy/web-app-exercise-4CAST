@@ -1,8 +1,8 @@
+import math
 from flask import Flask, render_template, request, redirect, url_for, abort
 from clothing_db import get_all_clothing, get_clothing, add_clothing, update_clothing, get_favorite_clothing, delete_clothing, get_weather_candidates, search_clothing
 from db_helpers import serialize_document
-import math
-#all .html are current place holds while waiting for the front-end template
+from weather_api import today_weather, WeatherError
 
 app = Flask(__name__)
 
@@ -112,6 +112,27 @@ def recommend():
     candidates = get_weather_candidates(temperature, unit=unit, exclude_colors=exclude_colors or None)
     return render(items=[serialize_document(i) for i in candidates], temperature=temperature)
 
+@app.route("/recommend-today")
+def recommend_today():
+    location = (request.args.get(location) or "").strip() or None
+    exclude_colors = [entry.strip().lower()
+                      for entry in (request.args.get("exclude_colors") or "").split(",")
+                      if entry.strip()
+                      ]
+
+    def render(*, items=None, error=None, temperature=None, place=None, description=None, status=200):
+        body = render_template("recommend.html", items=items, error=error,
+                               temperature=temperature, unit="F", place=place, description=description
+                               source="weather-api")
+        return body, status
+
+    try:
+        weather = today_weather(location)
+    except WeatherError as exc:
+        return render(error=str(exc), status=)
+
+
+
 @app.route("/search")
 def search():
     def render(*, items=None, error=None, status=200):
@@ -181,6 +202,8 @@ def _parse_int_arg(value, label, errors, *, minimum=None, maximum=None):
         errors.append(f"{label} must be at most {maximum}")
         return None
     return result
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
