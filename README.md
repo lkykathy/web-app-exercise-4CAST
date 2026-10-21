@@ -2,6 +2,13 @@
 
 A little exercise to build a web application following an agile development process. See the [instructions](instructions.md) for more detail.
 
+## Team Members
+
+- Belle Mbaezue 
+- Kathy Lin
+- Andy
+- Selma 
+
 ## Product vision statement
 
 4CAST is a predictive digital wardrobe that helps users make cohesive styling decisions, discover new outfit combinations, maximize the use of clothing they already own, and track garment utilization and textile circularity.
