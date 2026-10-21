@@ -37,7 +37,6 @@ def home():
 @app.route("/wardrobe")
 def show_wardrobe():
     items = [serialize_document(i) for i in get_all_clothing()]
-    # TODO: requires the correct html template
     return render_template("wardrobe.html", items=items)  
 
 @app.route("/favorites")
@@ -48,7 +47,6 @@ def favorites():
 @app.route("/add", methods=["GET", "POST"])
 def add():
     if request.method == "GET":
-        # TODO: requires the correct add.html template
         return render_template("add.html", error=None, item = {})
 
     data, errors = _read_clothing_form(request.form)
@@ -72,7 +70,6 @@ def edit(item_id):
     data["is_favorite"] = "is_favorite" in request.form
     data["is_available"] = "is_available" in request.form
     if errors:
-        # TODO: edit.html
         return render_template("edit.html", item=serialize_document(item), error="; ".join(errors)), 400
     
     update_clothing(item_id, data)
@@ -114,7 +111,7 @@ def recommend():
 
 @app.route("/recommend-today")
 def recommend_today():
-    location = (request.args.get(location) or "").strip() or None
+    location = (request.args.get("location") or "").strip() or None
     exclude_colors = [entry.strip().lower()
                       for entry in (request.args.get("exclude_colors") or "").split(",")
                       if entry.strip()
@@ -122,14 +119,30 @@ def recommend_today():
 
     def render(*, items=None, error=None, temperature=None, place=None, description=None, status=200):
         body = render_template("recommend.html", items=items, error=error,
-                               temperature=temperature, unit="F", place=place, description=description
+                               temperature=temperature, unit="F", place=place, description=description,
                                source="weather-api")
         return body, status
 
     try:
         weather = today_weather(location)
     except WeatherError as exc:
-        return render(error=str(exc), status=)
+        return render(error=str(exc), status=502)
+
+    temperature = weather.get("temperature_fahrenheit")
+    if temperature is None:
+        return render(error="weather service returned no temperature", status=502)
+
+    try:
+        candidates = get_weather_candidates(temperature, unit="F", exclude_colors=exclude_colors or None,)
+    except(TypeError, ValueError) as exc:
+        return render(error=f"could not find recommendation for this weather: {exc}", status = 502)
+
+    return render(
+        items=[serialize_document(i) for i in candidates],
+        temperature=temperature,
+        place=weather.get("place"),
+        description=weather.get("description")
+    )
 
 
 
