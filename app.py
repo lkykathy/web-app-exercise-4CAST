@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, redirect, url_for, abort
 from clothing_db import get_all_clothing, get_clothing, add_clothing, update_clothing, get_favorite_clothing, delete_clothing, get_weather_candidates, search_clothing
 from db_helpers import serialize_document
 from weather_api import today_weather, WeatherError
+from tagging import SUBCATEGORY_OPTIONS
 
 app = Flask(__name__)
 
@@ -13,6 +14,8 @@ def _read_clothing_form(form):
     image_url = (form.get("image_url") or "").strip()
     color = (form.get("color") or "").strip().lower()
     brand = (form.get("brand") or "").strip() or None
+    name = (form.get("name") or "").strip() or None
+    category = (form.get("category") or "").strip().lower() or None
     raw_warm = form.get("warmth_level")
 
     try:
@@ -25,9 +28,13 @@ def _read_clothing_form(form):
     if not color:
         errors.append("color is required")
 
-    data = {"image_url": image_url, "color": color, "brand": brand, "warmth_level": warmth}
+    if category is not None and category not in SUBCATEGORY_OPTIONS:
+            errors.append("Invalid category")
+    
+    data = {"image_url": image_url, "color": color, "brand": brand, "name": name,"warmth_level": warmth}
     if warmth not in WARMTH_CHOICES:
         errors.append("warmth level must be 1-5")
+
     return data, errors    
 
 @app.route("/")
@@ -133,9 +140,9 @@ def recommend_today():
         return render(error="weather service returned no temperature", status=502)
 
     try:
-        candidates = get_weather_candidates(temperature, unit="F", exclude_colors=exclude_colors or None,)
+        candidates = get_weather_candidates(temperature, unit="F", exclude_colors=exclude_colors or None)
     except(TypeError, ValueError) as exc:
-        return render(error=f"could not find recommendation for this weather: {exc}", status = 502)
+        return render(error=f"could not find recommendation for this weather: {exc}", status = 500)
 
     return render(
         items=[serialize_document(i) for i in candidates],
@@ -158,11 +165,15 @@ def search():
     brand = (request.args.get("brand") or "").strip() or None
     tags = (request.args.get("tags") or "").strip().lower() or None
     season = (request.args.get("season") or "").strip().lower() or None
+    material = (request.args.get("material") or "").strip().lower() or None
+    occasion = (request.args.get("occasion") or "").strip().lower() or None
+    q = (request.args.get("q") or "").strip() or None
     favorite = _parse_tri(request.args.get("favorite"), "favorite", errors)
     available = _parse_tri(request.args.get("available"), "available", errors)
     min_warmth = _parse_int_arg(request.args.get("min_warmth"), "min_warmth", errors, minimum=1, maximum=5)
     max_warmth = _parse_int_arg(request.args.get("max_warmth"), "max_warmth", errors, minimum=1, maximum=5)
-    limit = _parse_int_arg(request.args.get("limit"), "limit", errors, minimum=1, maximum=200)
+    limit = _parse_int_arg(request.args.get("limit"), "limit", errors, minimum=1, maximum=50)
+    
     exclude_colors = [entry.strip().lower()
                       for entry in (request.args.get("exclude_colors") or "").split(",")
                       if entry.strip()]
@@ -178,6 +189,9 @@ def search():
             tags=tags,
             season=season,
             brand=brand,
+            material=material,
+            occasion=occasion,
+            q=q,
             favorite=favorite,
             available=available,
             min_warmth=min_warmth,

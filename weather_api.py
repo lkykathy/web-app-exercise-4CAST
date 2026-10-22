@@ -24,7 +24,7 @@ def autolocate():
         country = data.get("country")
         if city and country:
             return f"{city}, {country}"
-    except requests.RequestException:
+    except ValueError:
         pass
     raise WeatherError("could not automatically detect your location")
 
@@ -53,13 +53,13 @@ def fetch_weather(location):
                 timeout=Timeout
             )
             response.raise_for_status()
-        except requests.HTTPError as exc:
+        except requests.RequestException as exc:
             status = exc.response.status_code if exc.response is not None else None
             if status == 401:
                 raise WeatherError("Weather API rejected the key (401), check API key") from exc
             if status == 404:
                 raise WeatherError(f"Weather API has no data for {location}") from exc
-            raise WeatherError(f"weather API error: {exc}") from exc
+            raise WeatherError("failed to connect to weather service") from exc
         try:
             payload = response.json()
         except ValueError as exc:
