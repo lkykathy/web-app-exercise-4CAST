@@ -12,21 +12,24 @@ cache_TTL = 600
 
 _cache = {}
 
+
 class WeatherError(Exception):
     pass
 
+
 def autolocate():
     try:
-        response = requests.get("https://ipinfo.io/json", timeout=5)
+        response = requests.get("https://ipinfo.io/json", timeout=Timeout)
         response.raise_for_status()
         data = response.json()
         city = data.get("city")
         country = data.get("country")
         if city and country:
             return f"{city}, {country}"
-    except ValueError:
+    except (requests.RequestException, ValueError):
         pass
     raise WeatherError("could not automatically detect your location")
+
 
 def _cached(key, producer):
     now = time.monotonic()
@@ -39,6 +42,7 @@ def _cached(key, producer):
     _cache[key] = (now + cache_TTL, value)
     return value
 
+
 def fetch_weather(location):
     if not API_key:
         raise WeatherError("API key error")
@@ -50,13 +54,15 @@ def fetch_weather(location):
             response = requests.get(
                 openWeather_url,
                 params={"q": location, "appid": API_key, "units": "imperial"},
-                timeout=Timeout
+                timeout=Timeout,
             )
             response.raise_for_status()
         except requests.RequestException as exc:
             status = exc.response.status_code if exc.response is not None else None
             if status == 401:
-                raise WeatherError("Weather API rejected the key (401), check API key") from exc
+                raise WeatherError(
+                    "Weather API rejected the key (401), check API key"
+                ) from exc
             if status == 404:
                 raise WeatherError(f"Weather API has no data for {location}") from exc
             raise WeatherError("failed to connect to weather service") from exc
@@ -65,20 +71,25 @@ def fetch_weather(location):
         except ValueError as exc:
             raise WeatherError("weather API returned non-JSON response") from exc
         try:
-            return{
+            return {
                 "temperature_fahrenheit": float(payload["main"]["temp"]),
                 "feels_like_fahrenheit": float(payload["main"]["feels_like"]),
-                "description": (payload["weather"][0]["description"] or "").capitalize(),
+                "description": (
+                    payload["weather"][0]["description"] or ""
+                ).capitalize(),
                 "place": payload.get("name") or location,
             }
-        except(KeyError, TypeError, ValueError, IndexError) as exc:
+        except (KeyError, TypeError, ValueError, IndexError) as exc:
             raise WeatherError("weather API returned malformed data") from exc
+
     return _cached(("own", location.lower()), fetch)
+
 
 def today_weather(location=None):
     if not location:
-        location=autolocate()
+        location = autolocate()
     return fetch_weather(location)
+
 
 # today_weather will run fetch_weather and will return the following information:
 # "temperature_fahrenheit": {temp}
