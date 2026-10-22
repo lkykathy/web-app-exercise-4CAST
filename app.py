@@ -1,4 +1,5 @@
 import math
+from datetime import datetime, timezone, timedelta
 from flask import Flask, render_template, request, redirect, url_for, abort
 from clothing_db import (
     get_all_clothing,
@@ -13,10 +14,40 @@ from clothing_db import (
 from db_helpers import serialize_document
 from weather_api import today_weather, WeatherError
 from tagging import SUBCATEGORY_OPTIONS
+from history_db import add_history, list_history
 
 app = Flask(__name__)
 
 WARMTH_CHOICES = (1, 2, 3, 4, 5)
+
+
+def _parse_tri(value, label, errors):
+    if value is None or not value.strip():
+        return None
+    lowered = value.strip().lower()
+    if lowered in ("1", "true", "on", "yes"):
+        return True
+    if lowered in ("0", "false", "off", "no"):
+        return False
+    errors.append(f"{label} must be a boolean")
+    return None
+
+
+def _parse_int_arg(value, label, errors, *, minimum=None, maximum=None):
+    if value is None or not value.strip():
+        return None
+    try:
+        result = int(value)
+    except ValueError:
+        errors.append(f"{label} must be an integer")
+        return None
+    if minimum is not None and result < minimum:
+        errors.append(f"{label} must be at least {minimum}")
+        return None
+    if maximum is not None and result > maximum:
+        errors.append(f"{label} must be at most {maximum}")
+        return None
+    return result
 
 
 def _read_clothing_form(form):
@@ -72,6 +103,36 @@ def favorites():
     return render_template("wardrobe.html", items=items)
 
 
+@app.route("/history")
+def history():
+    events = list_history(event_type="worn", limit=50)
+
+    seven_days_ago = datetime.now(timezone.utc) - timedelta(days=7)
+    recent_events = []
+    for e in events:
+        occurred_at = e.get("occurred_at")
+        if occurred_at:
+            if occurred_at.tzinfo is None:
+                occurred_at = occurred_at.replace(tzinfo=timezone.utc)
+            if occurred_at >= seven_days_ago:
+                recent_events.append(e)
+
+    serialized_events = [serialize_document(e) for e in recent_events]
+    return render_template("history.html", events=serialized_events)
+
+
+@app.route("/wear/<item_id>", methods=["POST"])
+def wear(item_id):
+    if get_clothing(item_id) is None:
+        abort(404)
+    try:
+        add_history([item_id], event_type="worn")
+    except (KeyError, ValueError):
+        abort(404)
+
+    return redirect(url_for("show_wardrobe"))
+
+
 @app.route("/add", methods=["GET", "POST"])
 def add():
     if request.method == "GET":
@@ -84,7 +145,11 @@ def add():
             400,
         )
 
-    add_clothing(data)
+    try:
+        add_clothing(data)
+    except (ValueError, KeyError) as exc:
+        return render_template("add.html", error=str(exc), item=request.form), 400
+
     return redirect(url_for("show_wardrobe"))
 
 
@@ -109,7 +174,17 @@ def edit(item_id):
             400,
         )
 
-    update_clothing(item_id, data)
+    if data.get("category") is None:
+        data.pop("category", None)
+
+    try:
+        update_clothing(item_id, data)
+    except (ValueError, KeyError) as exc:
+        return (
+            render_template("edit.html", item=serialize_document(item), error=str(exc)),
+            400,
+        )
+
     return redirect(url_for("show_wardrobe"))
 
 
@@ -204,9 +279,9 @@ def recommend_today():
         candidates = get_weather_candidates(
             temperature, unit="F", exclude_colors=exclude_colors or None
         )
-    except (TypeError, ValueError) as exc:
+    except (TypeError, ValueError):
         return render(
-            error=f"could not find recommendation for this weather: {exc}", status=500
+            error="could not find recommendation for this weather.", status=500
         )
 
     return render(
@@ -276,35 +351,6 @@ def search():
     except ValueError as exc:
         return render(error=str(exc), status=400)
     return render(items=[serialize_document(i) for i in results])
-
-
-def _parse_tri(value, label, errors):
-    if value is None or not value.strip():
-        return None
-    lowered = value.strip().lower()
-    if lowered in ("1", "true", "on", "yes"):
-        return True
-    if lowered in ("0", "false", "off", "no"):
-        return False
-    errors.append(f"{label} must be a boolean")
-    return None
-
-
-def _parse_int_arg(value, label, errors, *, minimum=None, maximum=None):
-    if value is None or not value.strip():
-        return None
-    try:
-        result = int(value)
-    except ValueError:
-        errors.append(f"{label} must be an integer")
-        return None
-    if minimum is not None and result < minimum:
-        errors.append(f"{label} must be at least {minimum}")
-        return None
-    if maximum is not None and result > maximum:
-        errors.append(f"{label} must be at most {maximum}")
-        return None
-    return result
 
 
 if __name__ == "__main__":
