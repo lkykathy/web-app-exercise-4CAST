@@ -91,8 +91,6 @@ try:
         str(x["_id"]) == item_id
         for x in get_favorite_clothing()
     )
-
-
     assert update_clothing(
         item_id,
         {"is_available": False}
