@@ -6,8 +6,8 @@ A little exercise to build a web application following an agile development proc
 
 - Belle Mbaezue 
 - Kathy Lin
-- Andy
-- Selma 
+- Andy Chi
+- Selma Nahas
 
 ## Product vision statement
 
