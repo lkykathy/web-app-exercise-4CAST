@@ -16,6 +16,15 @@ from weather_api import today_weather, WeatherError
 from tagging import SUBCATEGORY_OPTIONS
 from history_db import add_history, list_history
 
+#required HTML template
+"""
+search.html
+add.html
+edit.html
+recommend.html
+history.html
+"""
+
 app = Flask(__name__)
 
 WARMTH_CHOICES = (1, 2, 3, 4, 5)
