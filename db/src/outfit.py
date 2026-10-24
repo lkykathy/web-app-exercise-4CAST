@@ -13,14 +13,14 @@ SHOES_FOR_OCCASION = {
 
 
 def _occasion_labels(item):
-    labels = item.get("occaison", item.get("occasion", [])) or []
+    labels = item.get("occasion", item.get("occasion", [])) or []
     return {labels} if isinstance(labels, str) else set(labels)
 
 
 def _weather_vals(weather):
     temp = weather.get("feels_like_fahrenheit")
     if temp is None:
-        temp = weather.get("temprature_fahrenheit", weather.get("temp"))
+        temp = weather.get("temperature_fahrenheit", weather.get("temp"))
     unit = weather.get("unit", "F").upper()
     target_low, target_high = get_warmth_range(temp, unit=unit)
     celsius = (temp - 32) * 5 / 9 if unit == "F" else temp
@@ -36,13 +36,13 @@ def _outfit_record(parts, occasion, score):
         "score": round(score, 2),
         "item_ids": ids,
         "items":[{"role": role, "item": item} for role, item in parts],
-        "reasoning": f"A {occasion.replace("-", " ")} look selected for the current weather."
+        "reasoning": f"A {occasion.replace('-', ' ')} look selected for the current weather."
     }
 
 
 def build_outfits(candidates, *, weather, occasion, limit=5, refresh=0):
     ideal_warmth, celsius = _weather_vals(weather)
-    groups = {name: [] for name in ("tops", "bottoms", "one-piece", "shoes", "outwear")}
+    groups = {name: [] for name in ("tops", "bottoms", "one-piece", "shoes", "outerwear")}
     for item in candidates:
         if item.get("is_available") is False:
             continue
@@ -52,13 +52,18 @@ def build_outfits(candidates, *, weather, occasion, limit=5, refresh=0):
         labels = _occasion_labels(item)
         if main in {"tops", "bottoms", "one-piece"} and occasion not in labels:
             continue
-        if main in {"shoes", "outwear"} and labels and occasion not in labels:
+        if main in {"shoes", "outerwear"} and labels and occasion not in labels:
             continue
         if main == "shoes" and item.get("category") not in SHOES_FOR_OCCASION[occasion]:
             continue
         groups[main].append(item)
-        if not groups["shoes"]:
-            return []
+
+    print("\nFiltered clothing groups:")
+    for category, items in groups.items():
+        print(category, ":", [item.get("name") for item in items])
+
+    if not groups["shoes"]:
+        return []
 
     outerwear_items = groups["outerwear"][:3] if celsius < 20 else []
     outerwear_options = [None] + outerwear_items

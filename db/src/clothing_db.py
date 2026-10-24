@@ -2,7 +2,7 @@ import re
 import math 
 from .database import db
 from .db_helpers import now_utc, to_object_id, clean_text, text_list, warmth, page_limit
-from .tagging import refresh_derived, CATEGORY_TO_MAIN, HOME_OCCASIONS, normalize_category, normalize_materials, normalize_occasions
+from .tagging import refresh_derived, CATEGORY_TO_MAIN, normalize_category, normalize_materials, normalize_occasions
 
 CREATE_FIELDS = {"image_url", "color", "warmth_level","brand", "category", "material",
                  "occasion", "name", "is_favorite", "is_available", "source"}
