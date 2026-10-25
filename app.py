@@ -209,6 +209,29 @@ def add():
 
     return redirect(url_for("show_wardrobe"))
 
+@app.route("/circularity")
+def circularity():
+    all_items = get_all_clothing()
+    total_pieces = len(all_items)
+
+    available_count = sum(1 for item in all_items if item.get("is_available"))
+
+
+    events = list_history(event_type="worn", limit=50)
+    seven_days_ago = datetime.now(timezone.utc)-timedelta(days=7)
+
+    worn_items_ids = set()
+    for e in events:
+        occurred_at=e.get("occurred_at")
+        if occurred_at:
+            if occurred_at.tzinfor is None:
+                occurred_at = occurred_at.replace(tzinfo=timezone.utc)
+            if occurred_at >= seven_days_ago:
+                for item_id in e.get("item_ids", []):
+                    worn_items_ids.add(str(item_id))
+    worn_this_week = len(worn_items_ids)
+
+    return render_template("circularity.html", pieces=total_pieces, worn_count=worn_this_week, available_count=available_count)
 
 @app.route("/edit/<item_id>", methods=["GET", "POST"])
 def edit(item_id):
