@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4CAST | Add Garment</title>
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="stylesheet" href="../static/css/add-garment.css">
+
+</head>
+<body>
+    <header class="brand-heading wardrobe-heading">
+        <h1>4CAST</h1>
+        <span>WARDROBE</span>
+    </header>
+    <main class="page add-garment-page">
+        <p class="search-label">Search</p>
+        <div class="photo-area">
+            <span>CAMERA</span>
+        </div>
+        <p class="add-label">add a new item</p>
+        
+        <label class="photo-button">
+            take a photo
+            <input type="file" accept="image/*" capture="environment">
+        </label>
+
+        <label class="photo-button">
+            select from photo library
+            <input type="file" accept="image/*">
+        </label>
+
+        <button class="photo-button" type="button">
+            select from favorites
+        </button>
+
+        <button class="photo-button" type="button">
+            fetch from search
+        </button>
+        
+    </main>
+
+    <footer class="navbar">
+        <a class="logo" href="index.html" aria-label="4CAST home">
+            4CAST
+        </a>
+        <nav aria-label="Main navigation">
+            <a href="index.html">home</a>
+            <a href="wardrobe.html">wardrobe</a>
+            <a
+                class="add-button active"
+                href="add-garment.html"
+                aria-current="page"
+                aria-label="Add a garment"
+            >
+                +
+            </a>
+            <a href="#outfits">outfits</a>
+            <a href="#circularity">circularity</a>
+        </nav>
+    </footer>
+</body>
+</html>
