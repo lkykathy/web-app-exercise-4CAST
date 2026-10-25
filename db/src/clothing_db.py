@@ -2,7 +2,7 @@ import re
 import math 
 from .database import db
 from .db_helpers import now_utc, to_object_id, clean_text, text_list, warmth, page_limit
-from .tagging import refresh_derived, CATEGORY_TO_MAIN, normalize_category, normalize_materials, normalize_occasions
+from .tagging import refresh_derived, CATEGORY_TO_MAIN, normalize_category, normalize_materials, normalize_occasions, normalize_color, color_attributes
 
 CREATE_FIELDS = {"image_url", "color", "warmth_level","brand", "category", "material",
                  "occasion", "name", "is_favorite", "is_available", "source"}
@@ -19,6 +19,10 @@ def _user_fields(data, *, partial=False):
             result[field] = clean_text(data[field], field,
                             optional=field in {"brand", "name"},
                             lower=field == "color")
+    if "color" in data:
+        result["color"] = normalize_color(data["color"])
+    if "color_lightness" in data:
+        result["color_lightness"] = data["color_lightness"]
     if "category" in data:
         result["category"] = normalize_category(data["category"])
     if "material" in data:
@@ -44,7 +48,8 @@ def add_clothing(clothing):
     data.setdefault("source", "camera")
     data.setdefault("is_favorite", False)
     data.setdefault("is_available", True)
-    data.update(detected_color=None, color_confirmed=data["color"] is not None, created_at=now_utc())
+    data.update(color_attributes(data.get("color"), data.get("color_lightness")))
+    data.update(color_confirmed=True, created_at=now_utc())
     data["updated_at"] = data["created_at"]
     refresh_derived(data)
     return str(db.clothing_items.insert_one(data).inserted_id)
@@ -65,6 +70,8 @@ def _save(existing, change):
         data["occasions"] = data["occasion"]
     refresh_derived(data)
     updates = dict(change)
+    if "color" in change or "color_lightness" in change:
+        updates.update(color_attributes(data.get("color"), data.get("color_lightness")))
     for key in ("category", "main_category", "material", "occasion", "season"):
         updates[key] = data[key]
     updates.pop("_id", None)
@@ -81,7 +88,7 @@ def update_clothing(item_id, updates):
     if not changes:
         return True
     if "image_url" in changes and changes["image_url"] != existing["image_url"]:
-        changes = {"detected_color": None, "color": None, "category": None, "color_confirmed": False, **changes}
+        changes = {"category": None, **changes}
     if "color" in changes and changes["color"] is not None:
         changes["color_confirmed"] = True
     return _save(existing, changes)
@@ -91,20 +98,19 @@ def set_clothing_analysis(item_id, *, image_url, detected_color, category=None):
     existing = get_clothing(item_id)
     if existing is None:
         return False
-    change = {"detected_color": clean_text(detected_color, "detected_color", lower=True)}  
+    change = {}  
     category = normalize_category(category)  
     if not existing.get("category"):
         change["category"] = category
     return _save(existing, change)
 
 
-def confirm_clothing_color(item_id, color=None):
+def confirm_clothing_color(item_id, color=None, color_lightness=None):
     existing = get_clothing(item_id)
     if existing is None:
         return False
-    final_color = color if color is not None else existing.get("detected_color")
-    final_color = clean_text(final_color, "color", lower=True)
-    change = {"color": clean_text(final_color, "color", lower=True), "color_confirmed": True}
+    change = color_attributes(color, color_lightness)
+    change["color_confirmed"] = True
     return _save(existing, change)
 
 
