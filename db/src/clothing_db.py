@@ -2,9 +2,9 @@ import re
 import math 
 from .database import db
 from .db_helpers import now_utc, to_object_id, clean_text, text_list, warmth, page_limit
-from .tagging import refresh_derived, OCCASIONS, CATEGORY_OPTIONS, CATEGORY_TO_MAIN, normalize_category, normalize_materials, normalize_occasions
+from .tagging import refresh_derived, CATEGORY_TO_MAIN, normalize_category, normalize_materials, normalize_occasions
 
-CREATE_FIELDS = {"image_url", "color", "warmth_level","brand", "categeory", "material",
+CREATE_FIELDS = {"image_url", "color", "warmth_level","brand", "category", "material",
                  "occasion", "name", "is_favorite", "is_available", "source"}
 EDIT_FIELDS = CREATE_FIELDS - {"source"}
 SOURCES = ("camera", "photo-library", "search", "manual")
@@ -23,8 +23,8 @@ def _user_fields(data, *, partial=False):
         result["category"] = normalize_category(data["category"])
     if "material" in data:
         result["material"] = normalize_materials(data["material"])
-    if "occasion" in data:
-        result["occasions"] = normalize_occasions(data["occasions"])
+    if "occasion" in data or "occasions" in data:
+        result["occasion"] = normalize_occasions(data.get("occasions", data.get("occasion")))
     if "warmth_level" in data:
         result["warmth_level"] = warmth(data["warmth_level"])
     for field in ("is_favorite", "is_available"):
@@ -61,6 +61,8 @@ def get_all_clothing():
 
 def _save(existing, change):
     data = {**existing, **change}
+    if "occasions" not in data and "occasion" in data:
+        data["occasions"] = data["occasion"]
     refresh_derived(data)
     updates = dict(change)
     for key in ("category", "main_category", "material", "occasion", "season"):
@@ -184,10 +186,10 @@ def get_warmth_range(temperature, *, unit="F", exclude_colors=None, occasion=Non
         return 4, 5
 
 
-def get_weather_suit(clothing, temp, *, unit="F", feel_like=None, is_raining=False,
+def get_weather_suit(clothing, temp, *, unit="F", feels_like=None, is_raining=False,
                      is_snowing=False, wind_mph=0, gust_mph=None, humidity=None):
     unit = unit.upper()
-    effective = temp if feel_like is None else feel_like
+    effective = temp if feels_like is None else feels_like
     low, high = get_warmth_range(effective, unit=unit)
     level = warmth(clothing["warmth_level"])
     material = set(clothing.get("material") or [])
@@ -225,15 +227,15 @@ def get_weather_suit(clothing, temp, *, unit="F", feel_like=None, is_raining=Fal
     return {"suitable": True, "score": score}
 
 
-def get_weather_candidates(temp, *, unit="F", feel_like=None, humidity=None,
+def get_weather_candidates(temp, *, unit="F", feels_like=None, humidity=None,
                            is_raining=False, is_snowing=False, wind_mph=0,
                            gust_mph=None, occasion=None, exclude_colors=None, limit=50):
-    low, high = get_warmth_range(temp if feel_like is None else feel_like, unit=unit)
+    low, high = get_warmth_range(temp if feels_like is None else feels_like, unit=unit)
     items = search_clothing(available=True, confirmed=True, occasion=occasion, exclude_colors=exclude_colors,
                             min_warmth=low, max_warmth=high, limit=None)
     ranked = []
     for item in items:
-        result = get_weather_suit(item, temp, unit=unit, feel_like=feel_like, humidity=humidity,
+        result = get_weather_suit(item, temp, unit=unit, feels_like=feels_like, humidity=humidity,
                                   is_raining=is_raining, is_snowing=is_snowing, wind_mph=wind_mph, gust_mph=gust_mph)
         if result["suitable"]:
             ranked.append((result["score"], item))
@@ -242,6 +244,14 @@ def get_weather_candidates(temp, *, unit="F", feel_like=None, humidity=None,
 
 
 def get_weather_recommendation(weather, **filters):
-    inputs = {key: weather[key] for key in ("temp", "unit", "feel_like", "humidity", 
-                                            "is_raining", "is_snowing", "wind_mph", "gust_mph") if key in weather}
-    return get_weather_candidates(**inputs, **filters)
+    return get_weather_candidates(
+        temp=weather["temperature_fahrenheit"],
+        unit="F",
+        feel_like=weather.get("feels_like_fahrenheit"),
+        humidity=weather.get("humidity"),
+        is_raining=weather.get("is_raining", False),
+        is_snowing=weather.get("is_snowing", False),
+        wind_mph=weather.get("wind_mph", 0),
+        gust_mph=weather.get("gust_mph"),
+        **filters
+    )
