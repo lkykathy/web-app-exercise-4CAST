@@ -1,7 +1,7 @@
 from datetime import datetime
-from database import db
-from db_helpers import now_utc, to_object_id, required_object_id, clean_text, page_limit
-from tagging import OCCASIONS
+from .database import db
+from .db_helpers import now_utc, to_object_id, required_object_id, clean_text, page_limit
+from .tagging import OCCASIONS
 
 EVENT_TYPES = ("viewed", "recommended", "save", "worn")
 SNAPSHOT_FIELDS = ("image_url", "name", "category", "main_category", "color", 

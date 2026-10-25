@@ -1,7 +1,10 @@
 import math
+import os
+import uuid
+from werkzeug.utils import secure_filename
 from datetime import datetime, timezone, timedelta
 from flask import Flask, render_template, request, redirect, url_for, abort
-from clothing_db import (
+from db.src.clothing_db import (
     get_all_clothing,
     get_clothing,
     add_clothing,
@@ -11,10 +14,10 @@ from clothing_db import (
     get_weather_candidates,
     search_clothing,
 )
-from db_helpers import serialize_document
+from db.src.db_helpers import serialize_document
 from weather_api import today_weather, WeatherError
-from tagging import SUBCATEGORY_OPTIONS
-from history_db import add_history, list_history
+from db.src.tagging import SUBCATEGORY_OPTIONS
+from db.src.history_db import add_history, list_history
 
 #required HTML template
 """
@@ -26,6 +29,15 @@ history.html
 """
 
 app = Flask(__name__)
+
+app.config["UPLOAD_FOLDER"] = os.path.join(app.root_path, "static", "uploads")
+app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
+os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp', 'gif'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 WARMTH_CHOICES = (1, 2, 3, 4, 5)
 
@@ -61,7 +73,6 @@ def _parse_int_arg(value, label, errors, *, minimum=None, maximum=None):
 
 def _read_clothing_form(form):
     errors = []
-    image_url = (form.get("image_url") or "").strip()
     color = (form.get("color") or "").strip().lower()
     brand = (form.get("brand") or "").strip() or None
     name = (form.get("name") or "").strip() or None
@@ -73,8 +84,6 @@ def _read_clothing_form(form):
     except (TypeError, ValueError):
         warmth = None
 
-    if not image_url:
-        errors.append("image url is required")
     if not color:
         errors.append("color is required")
 
@@ -82,7 +91,6 @@ def _read_clothing_form(form):
         errors.append("Invalid category")
 
     data = {
-        "image_url": image_url,
         "color": color,
         "brand": brand,
         "name": name,
@@ -148,16 +156,42 @@ def add():
         return render_template("add.html", error=None, item={})
 
     data, errors = _read_clothing_form(request.form)
+
+    image_url = None
+    filepath = None
+    file = None
+
+    if "image_file" not in request.files:
+        errors.append("No image file provided")
+    else:
+        file = request.files["image_file"]
+        if file.filename == "":
+            errors.append("No selected file")
+        elif not allowed_file(file.filename):
+            errors.append("invalid file type. Use on of the following types: png, jpg, jpeg, webp, gif")
+        else:
+            filename = secure_filename(file.filename)
+            if not filename:
+                errors.append("invalid filename")
+            else:
+                unique_filename = f"{uuid.uuid4().hex}_{filename}"
+                filepath = os.path.join(app.config["UPLOAD_FOLDER"], unique_filename)
+                image_url = f"/static/uploads/{unique_filename}"
+
     if errors:
-        return (
-            render_template("add.html", error="; ".join(errors), item=request.form),
-            400,
-        )
+        return render_template("add.html", error="; ".join(errors), item=request.form), 400
+
+    if file and filepath:
+        file.save(filepath)
+
+    data["image_url"] = image_url
 
     try:
         add_clothing(data)
     except (ValueError, KeyError) as exc:
-        return render_template("add.html", error=str(exc), item=request.form), 400
+        if filepath and os.path.exists(filepath):
+            os.remove(filepath)
+        return render_template("add.html", error="could not save the clothing item, check the information and try again", item=request.form,), 400
 
     return redirect(url_for("show_wardrobe"))
 
