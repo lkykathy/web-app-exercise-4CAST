@@ -18,6 +18,10 @@ from db.src.db_helpers import serialize_document
 from weather_api import today_weather, WeatherError
 from db.src.tagging import SUBCATEGORY_OPTIONS
 from db.src.history_db import add_history, list_history
+from db.src.circularity_db import get_circularity_dashboard, update_care_status, rehome_clothing
+from db.src.styling import get_outfits
+from db.src.outfit import get_featured_outfits, get_outfits_for_weather
+
 
 #required HTML template
 """
@@ -85,8 +89,10 @@ def _read_clothing_form(form):
     if not color:
         errors.append("color is required")
 
-    if category is not None and category not in SUBCATEGORY_OPTIONS:
-        errors.append("Invalid category")
+    if category is None:
+        errors.append("category is required")
+    elif category not in SUBCATEGORY_OPTIONS:
+        errors.append("invalid category")
 
     data = {
         "color": color,
@@ -105,11 +111,18 @@ def _read_clothing_form(form):
 def home():
     try:
         weather = today_weather()
-        error=None
+        error = None
     except WeatherError as e:
-        Weather = None
+        weather = None
         error = str(e)
-    return render_template("index.html", weather=weather, error=error)
+
+    outfits = []
+    if weather:
+        try:
+            outfits=get_featured_outfits(weather)
+        except Exception as e:
+            print(f"Failed to generate outfits: {e}")
+    return render_template("index.html", weather=weather, error=error, outfits=outfits)
 
 
 @app.route("/wardrobe")
@@ -211,28 +224,12 @@ def add():
 
 @app.route("/circularity")
 def circularity():
-    all_items = get_all_clothing()
-    total_pieces = len(all_items)
+    end_at = datetime.now(timezone.utc)
+    start_at = end_at - timedelta(days=7)
 
-    available_count = sum(1 for item in all_items if item.get("is_available"))
-
-
-    events = list_history(event_type="worn", limit=50)
-    seven_days_ago = datetime.now(timezone.utc)-timedelta(days=7)
-
-    worn_items_ids = set()
-    for e in events:
-        occurred_at=e.get("occurred_at")
-        if occurred_at:
-            if occurred_at.tzinfor is None:
-                occurred_at = occurred_at.replace(tzinfo=timezone.utc)
-            if occurred_at >= seven_days_ago:
-                for item_id in e.get("item_ids", []):
-                    worn_items_ids.add(str(item_id))
-    worn_this_week = len(worn_items_ids)
-
-    return render_template("circularity.html", pieces=total_pieces, worn_count=worn_this_week, available_count=available_count)
-
+    dashboard_data = get_circularity_dashboard(start_at, end_at)
+    return render_template("circularity.html", data=dashboard_data)
+    
 @app.route("/edit/<item_id>", methods=["GET", "POST"])
 def edit(item_id):
     item = get_clothing(item_id)
@@ -278,53 +275,37 @@ def delete(item_id):
 @app.route("/recommend")
 def recommend():
     raw_temp = request.args.get("temperature")
-    unit = (request.args.get("unit") or "F").strip().upper()
-    exclude_colors = [
-        color.strip().lower()
-        for color in (request.args.get("exclude_colors") or "").split(",")
-        if color.strip()
-    ]
 
     def render(*, items=None, error=None, temperature=None, status=200):
-        body = render_template(
-            "recommend.html",
-            items=items,
-            error=error,
-            temperature=temperature,
-            unit=unit,
-        )
+        body = render_template("recommend.html", items=items, error=error, temperature=temperature)
         return body, status
-
-    if unit not in ("F", "C"):
-        return render(error="unit must be F or C", status=400)
 
     if raw_temp is None:
         return render()
+
     try:
         temperature = float(raw_temp)
     except ValueError:
         return render(error="temperature must be a number", status=400)
 
     if not math.isfinite(temperature):
-        return render(error="temperature must be a finite number", status=400)
+        return render(error="temperature must be finite number", status=400)
 
-    candidates = get_weather_candidates(
-        temperature, unit=unit, exclude_colors=exclude_colors or None
-    )
-    return render(
-        items=[serialize_document(i) for i in candidates], temperature=temperature
-    )
+    weather_mock = {"temperature_fahrenheit": temperature, "feels_like_dahrenheit": temperature, "unit": "F"}
+
+    try:
+        looks = get_outfits(weather_mock, limit=5)
+    except Exception as e:
+        return render(error="unable to generate recommendations.", status=500)
+
+    return render(items=looks, temperature=temperature)
 
 
 @app.route("/recommend-today")
 def recommend_today():
     location = (request.args.get("location") or "").strip() or None
-    exclude_colors = [
-        entry.strip().lower()
-        for entry in (request.args.get("exclude_colors") or "").split(",")
-        if entry.strip()
-    ]
-
+    occasion = request.args.get("occasion", "casual")
+    
     def render(
         *,
         items=None,
@@ -339,10 +320,8 @@ def recommend_today():
             items=items,
             error=error,
             temperature=temperature,
-            unit="F",
             place=place,
             description=description,
-            source="weather-api",
         )
         return body, status
 
@@ -356,16 +335,12 @@ def recommend_today():
         return render(error="weather service returned no temperature", status=502)
 
     try:
-        candidates = get_weather_candidates(
-            temperature, unit="F", exclude_colors=exclude_colors or None
-        )
-    except (TypeError, ValueError):
-        return render(
-            error="could not find recommendation for this weather.", status=500
-        )
+        looks = get_outfits_for_weather(weather, occasion=occasion, limit=5)
+    except Exception as e:
+        return render(error="could not generate recommendations for this weather.", status=500)
 
     return render(
-        items=[serialize_document(i) for i in candidates],
+        items=looks,
         temperature=temperature,
         place=weather.get("place"),
         description=weather.get("description"),

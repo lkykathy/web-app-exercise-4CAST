@@ -35,7 +35,7 @@ def _outfit_record(parts, occasion, score):
         "occasion": occasion,
         "score": round(score, 2),
         "item_ids": ids,
-        "items":[{"role": role, "item": item} for role, item in parts],
+        "parts":[{"role": role, "item": item} for role, item in parts],
         "reasoning": f"A {occasion.replace('-', ' ')} look selected for the current weather."
     }
 
@@ -50,7 +50,7 @@ def build_outfits(candidates, *, weather, occasion, limit=5, refresh=0):
         if main not in groups:
             continue
         labels = _occasion_labels(item)
-        if main in {"tops", "bottoms", "one-piece"} and occasion not in labels:
+        if main in {"tops", "bottoms", "one-piece"} and labels and occasion not in labels:
             continue
         if main in {"shoes", "outerwear"} and labels and occasion not in labels:
             continue

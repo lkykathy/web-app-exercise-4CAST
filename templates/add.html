@@ -58,8 +58,8 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="category">Category (Optional)</label>
-                        <select id="category" name="category">
+                        <label for="category">Category (Required)</label>
+                        <select id="category" name="category" required>
                             <option value="">Select a category...</option>
                             <option value="t-shirt" {% if item.get('category') == 't-shirt' %}selected{% endif %}>T-Shirt</option>
                             <option value="blouse" {% if item.get('category') == 'blouse' %}selected{% endif %}>Blouse</option>
@@ -80,7 +80,7 @@
                         </select>
                     </div>
 
-                    <button type="submit" class="submit-bin">
+                    <button type="submit" class="submit-btn">
                         Save to Wardrobe
                     </button>
 

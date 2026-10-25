@@ -17,33 +17,76 @@
         <section class="wardrobe-summary">
             <h3>Your Wardrobe</h3>
             <p class="piece-count">
-                <span>{{ pieces }}</span> PIECES
+                <span>{{ data.summary.pieces }}</span> PIECES
             </p>
             <div class="summary-stats">
                 <div>
                     <p>Worn this week</p>
-                    <span>{{ worn_count }}</span>
+                    <span>{{ data.summary.worn_this_week }} ({{ data.summary.worn_this_week_percentage}}%)</span>
                 </div>
                 <div>
                     <p>Ready to Rewear</p>
-                    <span>{{ available_count }}</span>
+                    <span>{{ data.summary.read_to_rewear }}</span>
                 </div>
             </div>
         </section>
         <section class="dashboard">
-            <h2>Circularity Dashboard</h2>
+            <h2>Rewear Tracker</h2>
             <div class="dashboard-box">
-                <div class="dashboard-row">
-                    Rewear tracker
-                </div>
-                <div class="dashboard-row">
-                    Repair &amp; care
-                </div>
-                <div class="dashboard-row">
-                    Rehome &amp; recirculate
-                </div>
+                {% for item in data.rewear_tracker %}
+                    <div class="dashboard-row" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>{{ item.name or 'Unnamed Item' }}</span>
+                        <span style="font-size: 12px; color: #777;">
+                            Worn {{ item.wear_count }} times
+                        </span>
+                    </div>
+                {% else %}
+                    <div class="dashboard-row">No items in your wardrobe yet</div>
+                {% endfor %}
             </div>
         </section>
+
+        <section class="dashboard">
+            <h2>Repair &amp; Care</h2>
+            <div class="dashboard-box">
+                {% set needs_care = data.repair_and_care | selectattr("care_status", "ne", "ready") | list %}
+                {% if needs_care %}
+                    {% for item in needs_care %}
+                        <div class="dashboard-row" style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>{{ item.name or 'Unnamed Item' }}</span>
+                            <span style="font-size: 12px; color: #c62828; text-transform: capitalize;">
+                                {{ item.care_status.replace('-', ' ') }}
+                            </span>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="dashboard-row">
+                        All items are clean and ready to wear!
+                    </div>
+                {% endif %}        
+            </div>
+        </section>
+
+        <section class="dashboard">
+            <h2>Rehome &amp; Recirculate</h2>
+            <div class="dashboard-box">
+                {% if data.rehome_and_recirculate.rehomed_items %}
+                    {% for item in data.rehome_and_recirculate.rehomed_items %}
+                        <div class="dashboard-row" style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>{{ item.name or 'Unnamed Item' }}</span>
+                            <span style="font-size: 12px; color: #777; text-transform: capitalize;">
+                                {{ item.lifecycle_status}}
+                            </span>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="dashboard-row">
+                        No items have been rehomed yet.
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+
     </main>
     <footer class="navbar">
         <a class="logo" href="{{ url_for('home') }}" aria-label="4CAST home">

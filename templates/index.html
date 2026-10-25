@@ -76,7 +76,7 @@
                     <p>Weather data currently unavailable.</p>
                 {% endif %}
             </section>
-         </main>
+        
 
             <!-- Outfit recommendation and wardrobe shortcut -->
              <section class="outfit-actions" aria-label="Wardrobe actions">
@@ -123,34 +123,36 @@
                             aria-pressed="false">Cocktail</button>
                 </div>
 
-                <div class="outfit-cards">
-                    <article class="outfit-card">
-                        <div class="outfit-image outfit-image-one">
-                            <span>LOOK 01</span>
-                        </div>
-                        <h3>Everyday ease</h3>
-                        <p>Casual</p>
-                    </article>
+                <div class="outfit-cards" style="display: flex; flex-direction: column; gap: 15px;">
+                    {% if outfits and outfits.values() | select | list %}
+                        {% for occasion, look in outfits.items() %}
+                            {% if look %}
+                                <article class="outfit-card" style="width: 100%;">
+                                    <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee;">
+                                        <h3 style="margin: 0;">Look {{ occasion | replace('-', ' ') | title }}</h3>
+                                        <span style="font-size: 12px; color: #777;"> Score: {{ look['score']}}</span>
+                                    </div>
 
-                    <article class="outfit-card">
-                        <div class="outfit-image outfit-image-two">
-                            <span>LOOK 02</span>
-                        </div>
-                        <h3>Soft structure</h3>
-                        <p>Smart Casual</p>
-                    </article>
-
-                    <article class="outfit-card">
-                        <div class="outfit-image outfit-image-three">
-                            <span>LOOK 03</span>
-                        </div>
-                        <h3>Modern classic</h3>
-                        <p>Casual</p>
-                    </article>
+                                    <div style="display: flex; gap: 10px; overflow-x: auto; padding: 15px;">
+                                        {% for part in look.parts %}
+                                            <div style="text-align: center; min-width: 80px;">
+                                                <img src="{{ part['item']['image_url'] }}" alt="{{ part['items']['name'] }}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px;">
+                                                <p style="font-size: 10px; margin: 4px 0 0 0; color: #777;">{{ part['role'] | title }}</p>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </article>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                            <div style="padding: 20px; text-align: center; background: #f9f9f9; border-radius: 8px;">
+                                <p>Add more tops, bottoms, and shoes to generate outfits!</p>
+                            </div>
+                    {% endif %}
                 </div>
 
               </section>
-
+ 
               <!-- Mood and color feature -->
                <section class="feature-panels" aria-label="Explore your style">
 
@@ -161,7 +163,7 @@
                 </a>
 
                 <!-- Circularity feature -->
-                 <a class="feature-panel circularity-panel" id="circularity" href="#care">
+                 <a class="feature-panel circularity-panel" id="circularity" href="{{ url_for('circularity')}}">
                     <span class="feature-eyebrow">CIRCULARITY</span>
                     <h2>Care, repair, and reuse</h2>
                     <span class="feature-arrow" aria-hidden="true">↗</span>
@@ -171,7 +173,7 @@
 
         <!-- Bottom navigation -->
         <footer class="navbar">
-            <a class="logo" href="#home" aria-label="4CAST home">4CAST</a>
+            <a class="logo" href="{{ url_for('home') }}" aria-label="4CAST home">4CAST</a>
 
             <nav aria-label="Main navigation">
                 <a class="active" href="{{ url_for('home') }}" aria-current="page">home</a>
