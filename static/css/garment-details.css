@@ -1,0 +1,48 @@
+.garment-details-page{
+    padding: 0 18px 90px;
+}
+.garment-image{
+    width: 100%;
+    aspect-ratio: 1/1;
+    background-color: var(--sage-light);
+    overflow: hidden;
+}
+.garment-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display:block;
+}
+.garment-tabs{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin-top: 18px;
+    border-bottom: 1px solid #999;
+}
+.garment-tabs span{
+    padding: 8px;
+    text-align: center;
+    font-family: var(--font-body);
+    font-size: 11px;
+}
+.garment-tabs span:first-child{
+    border-bottom: 2px solid #000;
+    font-weight: 700;
+}
+.garment-info{
+    width: 80%;
+    max-width: 360px;
+    margin: 22px auto 0;
+}
+.garment-info h2{
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 700;
+    margin: 20px 0 8px;
+}
+.info-row{
+    padding: 10px 4px;
+    border-bottom: 1px solid #d9d9d9;
+    font-family: var(--font-body);
+    font-size: 10px;
+}

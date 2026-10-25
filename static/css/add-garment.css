@@ -1,0 +1,41 @@
+.add-garment-page{
+    padding: 0 18px 90px;
+}
+.search-label{
+    text-align: center;
+    font-family: var(--font-body);
+    font-size: 11px;
+    margin: 8px 0 12px;
+}
+.photo-area{
+    height: 340px;
+    background-color: #d8c8e5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.photo-area span{
+    font-size: 20px;
+    font-family: var(--font-body);
+}
+.add-label{
+    font-family: var(--font-body);
+    font-size: 11px;
+    margin: 16px 6px 8px;
+}
+.photo-button{
+    width: 90%;
+    margin: 8px auto;
+    padding: 14px;
+    display: block;
+    border: none;
+    background-color: #d9d9d9;
+    font-family: var(--font-body);
+    font-size: 11px;
+    text-align: center;
+    cursor: pointer;
+}
+.photo-button input{
+    display: none;
+}
+
