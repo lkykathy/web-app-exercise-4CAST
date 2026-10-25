@@ -21,10 +21,8 @@ from db.src.history_db import add_history, list_history
 
 #required HTML template
 """
-search.html
 add.html
 edit.html
-recommend.html
 history.html
 """
 
@@ -105,7 +103,13 @@ def _read_clothing_form(form):
 
 @app.route("/")
 def home():
-    return redirect(url_for("show_wardrobe"))
+    try:
+        weather = today_weather()
+        error=None
+    except WeatherError as e:
+        Weather = None
+        error = str(e)
+    return render_template("index.html", weather=weather, error=error)
 
 
 @app.route("/wardrobe")
@@ -113,6 +117,16 @@ def show_wardrobe():
     items = [serialize_document(i) for i in get_all_clothing()]
     return render_template("wardrobe.html", items=items)
 
+@app.route("/garment/<item_id>")
+def garment_details(item_id):
+    item = get_clothing(item_id)
+    if item is None:
+        abort(404)
+    return render_template("garment-details.html", item=serialize_document(item))
+
+@app.route("/mood")
+def mood():
+    return render_template("mood.html")
 
 @app.route("/favorites")
 def favorites():

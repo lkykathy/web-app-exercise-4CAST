@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>4CAST | Wardrobe</title>
 
-    <link rel="stylesheet" href="../static/css/styles.css">
-    <link rel="stylesheet" href="../static/css/wardrobe.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/wardrobe.css') }}">
 
 </head>
 <body>
@@ -25,16 +25,6 @@
 
             <input type="search" id="wardrobe-search-input" placeholder="search your wardrobe..." aria-label="Search wardrobe">
         </form>
-        <!--
-        <form class="wardrobe-search">
-            <input 
-                type="search"
-                name="search"
-                placeholder="Search"
-                aria-label="Search wardrobe"
-                >
-        </form>
-        -->
         
         <section class="wardrobe-grid" aria-label="Your wardrobe">
             {% if items %}
@@ -44,9 +34,11 @@
                                     data-brand="{{ (item.brand or '')|lower }}"
                                     data-color="{{ (item.color or '')|lower }}"
                                     data-warmth="{{ item.warmth_level if item.warmth_level is not none else '' }}">
-                        <div class="clothing-image">
-                            <img src="{{ item.image_url }}" alt="{{ item.name or 'Clothing' }}" style="width: 100%; height: 100%; object-fit: cover;">
-                        </div>
+                        <a href="{{ url_for('garment_details', item_id=item._id)}}">
+                            <div class="clothing-image">
+                                <img src="{{ item.image_url }}" alt="{{ item.name or 'Clothing' }}" style="width: 100%; height: 100%; object-fit: contain;">
+                            </div>
+                        </a>
 
                         <div style="padding: 10px;">
                             <h3 style="margin: 0; font-size: 14px;">
@@ -72,55 +64,7 @@
                 </div>
             {% endif %} 
             <p id="no-search-results" hidden>No matching items found</p>  
-            <!--
-            <article class="clothing-card">
-                <a href="garment-details.html">
-                    <div class="clothing-image">
-                        <img src="../images/sweater-placeholder.jpg" alt="Gray sweater">
-                    </div>
-                </a>
-            </article>
-
-            <article class="clothing-card">
-                <a href="garment-details.html">
-                    <div class="clothing-image">
-                        <span>CLOTHING</span>
-                    </div>
-                </a>
-            </article>
-
-            <article class="clothing-card">
-                <a href="garment-details.html">
-                    <div class="clothing-image">
-                        <span>CLOTHING</span>
-                    </div>
-                </a>
-            </article>
-
-            <article class="clothing-card">
-                <a href="garment-details.html">
-                    <div class="clothing-image">
-                        <span>CLOTHING</span>
-                    </div>
-                </a>
-            </article>
-
-            <article class="clothing-card">
-                <a href="garment-details.html">
-                    <div class="clothing-image">
-                        <span>CLOTHING</span>
-                    </div>
-                </a>
-            </article>
-
-            <article class="clothing-card">
-                <a href="garment-details.html">
-                    <div class="clothing-image">
-                        <span>CLOTHING</span>
-                    </div>
-                </a>
-            </article>
-            -->
+            
             
         </section>
 
@@ -137,13 +81,13 @@
     <footer class="navbar">
         <a
             class="logo"
-            href="index.html"
+            href="{{ url_for('home') }}"
             aria-label="4CAST home"
         >
             4CAST
         </a>
         <nav aria-label="Main navigation">
-            <a href="index.html">
+            <a href="{{ url_for('home')}}">
                 home
             </a>
             <a

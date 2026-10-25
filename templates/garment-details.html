@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>4CAST | Garment Details</title>
+    <title>4CAST | {{ item.name or 'Garment Details'}}</title>
     <link rel="stylesheet" href="../static/css/styles.css">
     <link rel="stylesheet" href="../static/css/garment-details.css">
 
@@ -11,7 +11,7 @@
 <body>
     <main class="page garment-details-page">
         <div class="garment-image">
-            <img src="../images/sweater-placeholder.jpg" alt="Gray sweater">
+            <img src="{{ item.image_url }}" alt="{{ item.name or 'Clothing' }}">
         </div>
         <div class="garment-tabs">
             <span>Information</span>
@@ -19,13 +19,32 @@
         </div>
         <section class="garment-info">
             <h2>Occasion Info</h2>
-            <div class="info-row">Season</div>
-            <div class="info-row">Occasion</div>
+            <div class="info-row">
+                <strong>Season:</strong> {{item.season | join(', ') if item.season else 'None' }}
+            </div>
+            <div class="info-row">
+                <Strong>Occasion:</Strong> {{ item.occasion | join(', ') if item.occasion else 'None'}}
+            </div>
             <h2>Item Info</h2>
-            <div class="info-row">Category</div>
-            <div class="info-row">Color</div>
-            <div class="info-row">Material</div>
+            <div class="info-row">
+                <strong>Category:</strong> {{ item.category or 'None' }}
+            </div>
+            <div class="info-row">
+                <strong>Color:</strong> {{ item.color }}
+            </div>
+            <div class="info-row">
+                <strong>Material:</strong> {{ item.material | join(', ') if item.material else 'None' }}
+            </div>
+            <div style="margin-top: 20px; display: flex; gap: 10px;">
+                <a href="{{ url_for('edit', item_id=item._id) }}" style="padding: 10px 15px; background: var(--plum); color: white; text-decoration: none; border-radius: 5px; font-size: 12px;">
+                    Edit item
+                </a>
+                <a href="{{ url_for('show_wardrobe') }}" style="padding: 10px 15px; border: 1px solid var(--border); text-decoration: none; border-radius: 5px; font-size: 12px; color: var(--text);">
+                    Back to Wardrobe
+                </a>
+            </div>
         </section>
+
     </main>
     <footer class="navbar">
         <a

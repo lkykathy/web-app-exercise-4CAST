@@ -176,12 +176,12 @@
          </main>
           <!-- Bottom navigation -->
         <footer class="navbar">
-            <a class="logo" href="#home" aria-label="4CAST home">4CAST</a>
+            <a class="logo" href="{{ url_for('home')}}" aria-label="4CAST home">4CAST</a>
 
             <nav aria-label="Main navigation">
-                <a class="active" href="index.html" aria-current="page">home</a>
-                <a href="wardrobe.html">wardrobe</a>
-                <a class="add-button" href="#add-garment" aria-label="Add a garment">+</a>
+                <a class="active" href="{{ url_for('home') }}" aria-current="page">home</a>
+                <a href="{{ url_for('show_wardrobe')}}">wardrobe</a>
+                <a class="add-button" href="{{ url_for('add') }}" aria-label="Add a garment">+</a>
                 <a href="#outfits">outfits</a>
                 <a href="#circularity">circularity</a>
             </nav>
