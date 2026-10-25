@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name = "viewport" content="width=device-width, initial-scale=1.0">
+         <link rel="stylesheet" href="../static/css/styles.css">
+         <script src="../static/js/main.js" defer></script>
+        <title>4CAST | Mood & Color Quiz</title>
+    </head>
+    <body>
+        <!-- Brand heading -->
+        <header class="brand-heading">
+            <h1>4CAST</h1>
+        </header>
+
+        <!-- Quiz Content -->
+         <main class="quiz-page" id="mood">
+            <section class="quiz-progress">
+                <p id="progress-text">Your color forecast - 01 / 04</p>
+                <div class="progress-bars">
+                    <span class="progress-segment active"></span>
+                    <span class="progress-segment"></span>
+                    <span class="progress-segment"></span>
+                    <span class="progress-segment"></span>
+                </div>
+            </section>
+            <!-- Question 1 -->
+             <div class="question-one">
+                <section class="mood-question">
+                    <h2 id="question-text">How do you want to feel today?</h2>
+                </section>
+
+                <section class="mood-options">
+                    <button class="mood-option confident" type="button">
+                        Confident
+                    </button>
+
+                    <button class="mood-option soft" type="button">
+                        Soft
+                    </button>
+
+                    <button class="mood-option creative" type="button">
+                        Creative
+                    </button>
+
+                    <button class="mood-option grounded" type="button">
+                        Grounded
+                    </button>
+
+                </section>
+            </div>
+
+            <!-- Question 2 -->
+
+            <div class="question-two">
+                <section class="palette-question">
+                    <h2>Which palette are you most drawn to?</h2>
+                </section>
+
+                <section class="palette-options" id="palette-question">
+                    <button class="palette-option warm" type="button">
+                        <span class="palette-name">Warm & Fiery</span>
+                        <div class="palette-swatches">
+                            <span class="swatch warm-one"></span>
+                            <span class="swatch warm-two"></span>
+                            <span class="swatch warm-three"></span>
+                            <span class="swatch warm-four"></span>
+                        </div>
+                    </button>
+
+                    <button class="palette-option cool" type="button">
+                        <span class="palette-name">Cool & Striking</span>
+                        <div class="palette-swatches">
+                            <span class="swatch cool-one"></span>
+                            <span class="swatch cool-two"></span>
+                            <span class="swatch cool-three"></span>
+                            <span class="swatch cool-four"></span>
+                        </div>
+                    </button>
+
+                    <button class="palette-option earthy" type="button">
+                        <span class="palette-name">Earthy & Natural</span>
+                        <div class="palette-swatches">
+                            <span class="swatch earthy-one"></span>
+                            <span class="swatch earthy-two"></span>
+                            <span class="swatch earthy-three"></span>
+                            <span class="swatch earthy-four"></span>
+                        </div>
+                    </button>
+
+                    <button class="palette-option dream" type="button">
+                        <span class="palette-name">Soft & Dreamlike</span>
+                        <div class="palette-swatches">
+                            <span class="swatch dream-one"></span>
+                            <span class="swatch dream-two"></span>
+                            <span class="swatch dream-three"></span>
+                            <span class="swatch dream-four"></span>
+                        </div>
+                    </button>
+
+                    <button class="palette-option dark" type="button">
+                        <span class="palette-name">Dark & Minimal</span>
+                        <div class="palette-swatches">
+                            <span class="swatch dark-one"></span>
+                            <span class="swatch dark-two"></span>
+                            <span class="swatch dark-three"></span>
+                            <span class="swatch dark-four"></span>
+                        </div>
+                    </button>
+
+                    <button class="palette-option playful" type="button">
+                        <span class="palette-name">Playful & Eclectic</span>
+                        <div class="palette-swatches">
+                            <span class="swatch playful-one"></span>
+                            <span class="swatch playful-two"></span>
+                            <span class="swatch playful-three"></span>
+                            <span class="swatch playful-four"></span>
+                        </div>
+                    </button>
+
+                </section>
+            </div>
+
+            <div class="question-three">
+                <section class="style-question">
+                    <h2>Which style best matches your mood?</h2>
+                </section>
+
+                <section class="style-options">
+                    <button class="style-option minimalist" type="button">
+                        Minimalist
+                    </button>
+
+                    <button class="style-option romantic" type="button">
+                        Romantic
+                    </button>
+
+                    <button class="style-option streetwear" type="button">
+                        Streetwear
+                    </button>
+
+                    <button class="style-option classic" type="button">
+                        Classic
+                    </button>
+                </section>
+            </div>
+
+            <div class="question-four">
+                <section class="energy-question">
+                    <h2>What energy do you want your outfit to give off?</h2>
+                </section>
+
+                <section class="energy-options">
+                    <button class="energy-option bold" type ="button">
+                        Bold & Powerful
+                    </button> 
+
+                    <button class="energy-option effortless" type ="button">
+                        Effortless & Relaxed
+                    </button> 
+
+                    <button class="energy-option elegant" type ="button">
+                        Elegant & Refined
+                    </button> 
+
+                    <button class="energy-option fun" type ="button">
+                        Fun & Expressive
+                    </button> 
+                </section>
+            </div>
+
+            <button class="continue-button" type="button">
+                CONTINUE
+            </button>
+             
+         </main>
+          <!-- Bottom navigation -->
+        <footer class="navbar">
+            <a class="logo" href="#home" aria-label="4CAST home">4CAST</a>
+
+            <nav aria-label="Main navigation">
+                <a class="active" href="index.html" aria-current="page">home</a>
+                <a href="wardrobe.html">wardrobe</a>
+                <a class="add-button" href="#add-garment" aria-label="Add a garment">+</a>
+                <a href="#outfits">outfits</a>
+                <a href="#circularity">circularity</a>
+            </nav>
+        </footer>
+    </body>
+</html>
