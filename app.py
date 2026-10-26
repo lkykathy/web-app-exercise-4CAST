@@ -121,6 +121,7 @@ def home():
         weather = None
         error = str(e)
 
+    today_date = datetime.now().strftime("%A, %B, %d")
     outfits = {}
     if weather and request.args.get("generate")=="true":
         try:
@@ -128,7 +129,7 @@ def home():
             outfits = {k: serialize_document(v) for k,v in featured.items() if v is not None}
         except Exception as e:
             print(f"Failed to generate outfits: {e}")
-    return render_template("index.html", weather=weather, error=error, outfits=outfits)
+    return render_template("index.html", weather=weather, error=error, outfits=outfits, today_date=today_date)
 
 
 @app.route("/wardrobe")
