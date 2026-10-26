@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>4CAST | My Outfits</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css')}}">
+</head>
+
+<body>
+    <header class="brand-heading">
+        <h1>4CAST</h1>
+    </header>
+
+    <main class="outfits-page">
+        <section>
+            <div class="section-header">
+                <h2>Saved Favorites</h2>
+                {% if favorites and favorites|length > 2 %}
+                    <button class="see-more-btn" onclick="toggleSection('favorites-container', this)">See More</button>
+                {% endif %}
+            </div>
+            <div id="favorites-container" class="outfit-scroll-container">
+                {% if favorites %}
+                    {% for favorite in favorites %}
+                        <article class="outfit-card">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <h3 style="margin: 0;">
+                                    {{ favorite.occasion | title }} Look
+                                </h3>
+                                <span style="font-size: 12px; color: #777;">Score: {{ favorite.score }}</span>
+                                <button onclick="deleteFavorite('{{ favorite._id}}')" style="background: none; border: none; cursor: pointer; font-size: 16px; transition: transform 0.2s;"
+                                                onmouseover="this.style.transform='scale(1.2)'"
+                                                onmouseout="this.style.transform='scale(1)'"
+                                                title="Delete Facorite">🗑️</button>
+                            </div>
+                            <div class="outfit-items">
+                                {% for part in favorite.parts %}
+                                    <div class="outfit-item">
+                                        <img src="{{ part.item.image_url }}" alt="{{ part.item.name }}">
+                                        <p style="font-size: 10px; margin: 4px 0; color: #777">
+                                            {{ part.role | title }}
+                                        </p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </article>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-message">
+                        <p>You haven't saved any favorite outfits yet.</p>
+                        <p style="font-size: 12px;">Click the ❤️ on a recommended outfit to save it here!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <section>
+            <div class="section-header">
+                <h2>Mood & Color Recommendations</h2>
+                {% if mood_outfits and mood_outfits|length > 2 %}
+                    <button class="see-more-btn" onclick="toggleSection('mood-container', this)">See More</button>
+                {% endif %}
+            </div>
+
+            <div id="mood-container" class="outfit-scroll-container">
+                {% if mood_outfits %}
+                    {% for look in mood_outfits %}
+                        <article class="outfit-card">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <h3 style="margin: 0;">Mood Look {{ loop.index }}</h3>
+                                <span style="font-size: 12px; color: #777;"> Score: {{ look.ranking_score }}</span>
+                                <button onclick='saveToFavorites({{ look | tojson }})' style="background: none; border: none; cursor: pointer; font-size: 18px; transition: transform 0.2s;"
+                                                onmouseover="this.style.transform='scale(1.2)'"
+                                                onmouseout="this.style.transform='scale(1)'"
+                                                title="Save to Favorites">❤️</button>
+                            </div>
+                            <div class="outfit-items">
+                                {% for part in look.parts%}
+                                    <div class="outfit-item">
+                                        <img src="{{ part.item.image_url}}" alt="{{ part.item.name }}">
+                                        <p style="font-size: 10px; margin: 4px 0; color: #777;">
+                                            {{ part.role | title }}
+                                        </p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </article>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-message" style="display: felx; flex-direction: column; align-items: center; justify-content: center; min-height: 150px;">
+                        <p>Your personalized mood and color outfits will appear here once you take the quiz</p>
+                        <br>
+                    </div>
+                </div>
+            {% endif %}
+
+        </section>
+
+    </main>
+
+    <footer class="navbar">
+        <a class="logo" href="{{ url_for('home') }}" aria-label="4CAST home">
+            4CAST
+        </a>
+        <nav aria-label="Main navigation">
+            <a href="{{ url_for('home') }}">home</a>
+            <a href="{{ url_for('show_wardrobe') }}">wardrobe</a>
+            <a class="add-button" href="{{ url_for('add') }}" aria-label="Add a garment">+</a>
+            <a class="active" href="{{ url_for('outfits_page') }}" aria-current="page">outfits</a>
+            <a href="{{ url_for('circularity') }}">circularity</a>
+        </nav>
+    </footer>
+ 
+    <script>
+        function toggleSection(containerId, btn) {
+            const container = document.getElementById(containerId);
+            container.classList.toggle('expanded');
+
+            if (container.classList.contains('expanded')){
+                btn.textContent = "See Less";
+            }
+            else{
+                btn.textContent = "See More"
+            }
+        }
+
+        function saveToFavorites(look) {
+            fetch('/save_favorite', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(look)})
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    alert('Outfit saved to Favorites')
+                    window.location.reload()
+                }
+                else{
+                    alert('Failed to save outfit')
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error saving outfit.');
+            });
+        }
+
+        function deleteFavorite(favoriteId){
+            if(!confirm("Confirm to remove this outfit from your favorites")){
+                return;
+            }
+
+            fetch('/delete_favorite/' + favoriteId, {method: 'POST'})
+            .then(response => response.json())
+            .then(data => {
+                if(data.success){
+                    alert('outfit removed from favorites');
+                    window.location.reload();
+                }
+                else{
+                    alert('Failed to delete item');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error deleting outfit')
+            });
+        }
+    </script>
+
+</body>
+
+</html>
