@@ -81,7 +81,7 @@
             <!-- Outfit recommendation and wardrobe shortcut -->
              <section class="outfit-actions" aria-label="Wardrobe actions">
 
-                <a class="recommendation-action" href="#outfits">
+                <a class="recommendation-action" href="{{ url_for('home') }}?generate=true#outfits">
                     <div class="recommendation-illustration">
                         <!-- Replace with generation -->
                          <span aria-hidden="true">*</span>
@@ -146,7 +146,11 @@
                         {% endfor %}
                     {% else %}
                             <div style="padding: 20px; text-align: center; background: #f9f9f9; border-radius: 8px;">
-                                <p>Add more tops, bottoms, and shoes to generate outfits!</p>
+                                {% if not request.args.get('generate') %}
+                                    <p>Click "Get outfit recommendations" above to generate your looks!</p>
+                                {% else %}
+                                    <p>Add more tops, bottoms, and shoes to generate outfits!</p>
+                                {% endif %}
                             </div>
                     {% endif %}
                 </div>
@@ -179,7 +183,7 @@
                 <a class="active" href="{{ url_for('home') }}" aria-current="page">home</a>
                 <a href="{{ url_for('show_wardrobe') }}">wardrobe</a>
                 <a class="add-button" href="{{ url_for('add') }}" aria-label="Add a garment">+</a>
-                <a href="{{ url_for('recommend')}}">outfits</a>
+                <a href="{{ url_for('outfits_page')}}">outfits</a>
                 <a href="{{ url_for('circularity') }}">circularity</a>
             </nav>
         </footer>

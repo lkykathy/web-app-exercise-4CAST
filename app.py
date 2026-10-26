@@ -21,6 +21,7 @@ from db.src.history_db import add_history, list_history
 from db.src.circularity_db import get_circularity_dashboard, update_care_status, rehome_clothing
 from db.src.styling import get_outfits
 from db.src.outfit import get_featured_outfits, get_outfits_for_weather
+from db.src.database import db
 
 
 #required HTML template
@@ -116,8 +117,8 @@ def home():
         weather = None
         error = str(e)
 
-    outfits = []
-    if weather:
+    outfits = {}
+    if weather and request.args.get("generate")=="true":
         try:
             outfits=get_featured_outfits(weather)
         except Exception as e:
@@ -137,8 +138,25 @@ def garment_details(item_id):
         abort(404)
     return render_template("garment-details.html", item=serialize_document(item))
 
-@app.route("/mood")
+@app.route("/mood", methods=["GET", 'POST'])
 def mood():
+    if request.method == "POST":
+        quiz_answers = {
+            "mood": request.form.get("mood"),
+            "palette": request.form.get("palette"),
+            "style": request.form.get("style"),
+            "energy": request.form.get("energy")
+        }
+
+        try:
+            weather = today_weather()
+        except WeatherError:
+            weather = {"temperature_fahrenheit": 70, "feels_like_fahrenheit": 70}
+
+        mood_outfits = get_outfits(weather, limit=5, quiz_answers=quiz_answers)
+        favorites = list(db.favorite_outfits.find({}))
+
+        return render_template("outfits.html", favorites=favorites, mood_outfits=mood_outfits)
     return render_template("mood.html")
 
 @app.route("/favorites")
@@ -146,6 +164,10 @@ def favorites():
     items = [serialize_document(i) for i in get_favorite_clothing()]
     return render_template("wardrobe.html", items=items)
 
+@app.route("/outfits")
+def outfits_page():
+    favorites = list(db.favorite_outfits.find({}))
+    return render_template("outfits.html", favorites=favorites)
 
 @app.route("/history")
 def history():

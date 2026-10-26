@@ -15,6 +15,12 @@
 
         <!-- Quiz Content -->
          <main class="quiz-page" id="mood">
+            <form method="POST" action="{{ url_for('mood') }}" id="quiz-form">
+                <input type="hidden" name="mood" id="input-mood">
+                <input type="hidden" name="palette" id="input-palette">
+                <input type="hidden" name="style" id="input-style">
+                <input type="hidden" name="energy" id="input-energy">
+            
             <section class="quiz-progress">
                 <p id="progress-text">Your color forecast - 01 / 04</p>
                 <div class="progress-bars">
@@ -31,19 +37,19 @@
                 </section>
 
                 <section class="mood-options">
-                    <button class="mood-option confident" type="button">
+                    <button class="mood-option confident" type="button" onclick="selectAnswer('mood', 'confident', this)">
                         Confident
                     </button>
 
-                    <button class="mood-option soft" type="button">
+                    <button class="mood-option soft" type="button" onclick="selectAnswer('mood', 'soft', this)">
                         Soft
                     </button>
 
-                    <button class="mood-option creative" type="button">
+                    <button class="mood-option creative" type="button" onclick="selectAnswer('mood', 'creative', this)">
                         Creative
                     </button>
 
-                    <button class="mood-option grounded" type="button">
+                    <button class="mood-option grounded" type="button" onclick="selectAnswer('mood', 'grounded', this)">
                         Grounded
                     </button>
 
@@ -52,13 +58,13 @@
 
             <!-- Question 2 -->
 
-            <div class="question-two">
+            <div class="question-two question-block" style="display: none;">
                 <section class="palette-question">
                     <h2>Which palette are you most drawn to?</h2>
                 </section>
 
                 <section class="palette-options" id="palette-question">
-                    <button class="palette-option warm" type="button">
+                    <button class="palette-option warm" type="button" onclick="selectAnswer('palette', 'warm & fiery', this)">
                         <span class="palette-name">Warm & Fiery</span>
                         <div class="palette-swatches">
                             <span class="swatch warm-one"></span>
@@ -68,7 +74,7 @@
                         </div>
                     </button>
 
-                    <button class="palette-option cool" type="button">
+                    <button class="palette-option cool" type="button" onclick="selectAnswer('palette', 'cool & striking', this)">
                         <span class="palette-name">Cool & Striking</span>
                         <div class="palette-swatches">
                             <span class="swatch cool-one"></span>
@@ -78,7 +84,7 @@
                         </div>
                     </button>
 
-                    <button class="palette-option earthy" type="button">
+                    <button class="palette-option earthy" type="button" onclick="selectAnswer('palette', 'earthy & natural', this)">
                         <span class="palette-name">Earthy & Natural</span>
                         <div class="palette-swatches">
                             <span class="swatch earthy-one"></span>
@@ -88,7 +94,7 @@
                         </div>
                     </button>
 
-                    <button class="palette-option dream" type="button">
+                    <button class="palette-option dream" type="button" onclick="selectAnswer('palette', 'soft & dreamlike', this)">
                         <span class="palette-name">Soft & Dreamlike</span>
                         <div class="palette-swatches">
                             <span class="swatch dream-one"></span>
@@ -98,7 +104,7 @@
                         </div>
                     </button>
 
-                    <button class="palette-option dark" type="button">
+                    <button class="palette-option dark" type="button" onclick="selectAnswer('palette', 'dark & minimal', this)">
                         <span class="palette-name">Dark & Minimal</span>
                         <div class="palette-swatches">
                             <span class="swatch dark-one"></span>
@@ -108,7 +114,7 @@
                         </div>
                     </button>
 
-                    <button class="palette-option playful" type="button">
+                    <button class="palette-option playful" type="button" onclick="selectAnswer('palette', 'playful & eclectic', this)">
                         <span class="palette-name">Playful & Eclectic</span>
                         <div class="palette-swatches">
                             <span class="swatch playful-one"></span>
@@ -121,57 +127,58 @@
                 </section>
             </div>
 
-            <div class="question-three">
+            <div class="question-three question-block" style="display: none;">
                 <section class="style-question">
                     <h2>Which style best matches your mood?</h2>
                 </section>
 
                 <section class="style-options">
-                    <button class="style-option minimalist" type="button">
+                    <button class="style-option minimalist" type="button" onclick="selectAnswer('style', 'minimalist', this)">
                         Minimalist
                     </button>
 
-                    <button class="style-option romantic" type="button">
+                    <button class="style-option romantic" type="button" onclick="selectAnswer('style', 'romantic', this)">
                         Romantic
                     </button>
 
-                    <button class="style-option streetwear" type="button">
+                    <button class="style-option streetwear" type="button" onclick="selectAnswer('style', 'streetwear', this)">
                         Streetwear
                     </button>
 
-                    <button class="style-option classic" type="button">
+                    <button class="style-option classic" type="button" onclick="selectAnswer('style', 'classic', this)">
                         Classic
                     </button>
                 </section>
             </div>
 
-            <div class="question-four">
+            <div class="question-four question-block" style="display: none;">
                 <section class="energy-question">
                     <h2>What energy do you want your outfit to give off?</h2>
                 </section>
 
                 <section class="energy-options">
-                    <button class="energy-option bold" type ="button">
+                    <button class="energy-option bold" type ="button" onclick="selectAnswer('energy', 'bold & powerful', this)">
                         Bold & Powerful
                     </button> 
 
-                    <button class="energy-option effortless" type ="button">
+                    <button class="energy-option effortless" type ="button" onclick="selectAnswer('energy', 'effortless & relaxed', this)">
                         Effortless & Relaxed
                     </button> 
 
-                    <button class="energy-option elegant" type ="button">
+                    <button class="energy-option elegant" type ="button" onclick="selectAnswer('energy', 'elegant & refined', this)">
                         Elegant & Refined
                     </button> 
 
-                    <button class="energy-option fun" type ="button">
+                    <button class="energy-option fun" type ="button" onclick="selectAnswer('energy', 'fun & expressive', this)">
                         Fun & Expressive
                     </button> 
                 </section>
             </div>
 
-            <button class="continue-button" type="button">
+            <button class="continue-button" type="button" id="continue-btn" onclick="nextQuestion()" disabled style="opacity: 0.5;">
                 CONTINUE
             </button>
+            </form>
              
          </main>
           <!-- Bottom navigation -->
@@ -186,5 +193,47 @@
                 <a href="{{ url_for('circularity') }}">circularity</a>
             </nav>
         </footer>
+
+        <script>
+            let currentQuestion = 1;
+            const totalQuestions = 4;
+            const answers = { mood: null, palette: null, style: null, energy: null};
+
+            function selectAnswer(key, value, btnElement) {
+                answers[key] = value;
+                document.getElementById(`input-${key}`).value = value;
+
+                const parent = btnElement.parentElement;
+                parent.querySelectorAll('button').forEach(b => b.style.border = '1px solid var(--border)');
+                btnElement.style.border = '2px solid var(--plum)';
+
+                const continueBtn = document.getElementById('continue-btn');
+                continueBtn.disabled = false;
+                continueBtn.style.opacity = '1';
+            }
+
+            function nextQuestion() {
+                if( currentQuestion >= totalQuestions){
+                    document.getElementById('quiz-form').submit();
+                    return;
+                }
+
+                const currentBlock = document.querySelector(`.question-${['one', 'two', 'three', 'four'][currentQuestion-1]}`);
+                currentBlock.style.display = 'none';
+                currentQuestion++;
+
+                const nextBlock = document.querySelector(`.question-${['one', 'two', 'three', 'four'][currentQuestion - 1]}`);
+                nextBlock.style.display = 'block';
+
+                document.getElementById('progress-text').textContent = `Your color forecast - 0${currentQuestion} / 04`;
+                const segment = document.querySelectorAll('.progress-segment');
+                segment[currentQuestion - 1].classList.add('active');
+
+                const continueBtn = document.getElementById('continue-btn')
+                continueBtn.disabled = true;
+                continueBtn.style.opacity='0.5';
+            }
+        </script>
+
     </body>
 </html>

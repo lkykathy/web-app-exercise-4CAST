@@ -55,11 +55,11 @@ def score_color(parts):
                         for p, item in zip(positions, items))
     rec = []
     if ((len(hues) == 1 and neutral_count == 0) or len({i.get("color") for i in items}) == 1) and len({(i.get("color_lightness"), i.get("color_temp")) for i in items}) > 1:
-        rec.append(35, "monochromatic")
+        rec.append((35, "monochromatic"))
     if len(hues) >= 2:
         distance = [color_distance(a,b) for a,b in combinations(hues, 2)]
         if max(distance) <= 2:
-            rec.append(30, "analogous")
+            rec.append((30, "analogous"))
         if len(hues) == 2 and distance == [6]:
             rec.append((30, "complementary"))
     by_role = dict(parts)
@@ -72,7 +72,7 @@ def score_color(parts):
     repeated = any(family(top) == family(by_role[role]) for role in ("shoes", "accessory"))
     if repeated and family(top) != family(bottom):
         if len(hues) <= 2 or all(color_distance(a,b) <= 2 for a,b in combinations(hues, 2)):
-            rec.append(30, "sandwiched")
+            rec.append((30, "sandwiched"))
     if neutral_count >= 2 and len(hues) == 1:
         rec.append((25, "neutral + accent"))
     if not hues and neutral_count == len(items):
@@ -158,8 +158,8 @@ def build_outfits(candidates, *, weather, limit=5, quiz_answers=None):
         weather_score[str(item["_id"])] = suit["score"]
         groups[main].append(item)
     pool = {}
-    for top, bottom, shoes, accessory, outerwear in product(groups["tops", groups["bottoms"],
-                                                            groups["shoes"], groups["accessories"], None + groups["outerwear"]]):
+    for top, bottom, shoes, accessory, outerwear in product(
+        groups["tops"], groups["bottoms"], groups["shoes"], groups["accessories"], [None] + groups["outerwear"]):
         parts = [("top", top), ("bottom", bottom), ("shoes", shoes), ("accessory", accessory)]
         if outerwear is not None:
             parts.append(("outerwear", outerwear))
@@ -167,11 +167,11 @@ def build_outfits(candidates, *, weather, limit=5, quiz_answers=None):
         signature = tuple(sorted(ids))
         color_score, relationship = score_color(parts)
         dev = [abs(item["warmth_level"] - ideal) for _, item in parts]
-        weather_score = max(0, min(35, 35-6 * sum(dev) / len(parts) + sum(weather_score[i] for i in ids) / len(ids)))
+        look_weather_score = max(0, min(35, 35-6 * sum(dev) / len(parts) + sum(weather_score[i] for i in ids) / len(ids)))
         mismatch_penalty = min(25, sum(max(0, d - 1) * 5 for d in dev))
         look_id = sha256(("|".join(signature)).encode()).hexdigest()[:16]
         pool[signature] = dict(id=look_id, item_ids=ids, items=[dict(color=r, item=i) for r,i in parts],
-                               relationship=relationship, score_breakdown=dict(weather=round(weather_score, 2),
+                               relationship=relationship, score_breakdown=dict(weather=round(look_weather_score, 2),
                                                                                color=color_score,
                                                                                penalty=mismatch_penalty,
                                                                                completeness=15))
@@ -192,7 +192,7 @@ def build_outfits(candidates, *, weather, limit=5, quiz_answers=None):
             breakdown  = look["score_breakdown"]
             breakdown.update(variety=round(variety, 2), similarity_penalty=duplicate_penalty)
             look["score"] = round(max(0, min(100, breakdown["weather"] + breakdown["color"] + 15 + 
-                                             breakdown["variety"] - breakdown["weather_penalty"] - duplicate_penalty)), 2)
+                                             breakdown["variety"] - breakdown["penalty"] - duplicate_penalty)), 2)
             look["reasoning"] = f"{look['relationship'].capitalize()}; weather suitable; includes an accessory."
             look["ranking_score"] = round((1 - QUIZ_WEIGHT) * look["score"] + QUIZ_WEIGHT * look["quiz_score"], 2) if rules is not None else look["score"]
         winner = min(pool.values(), key=lambda look: (-look["ranking_score"], look["id"]))
