@@ -24,4 +24,5 @@ A little exercise to build a web application following an agile development proc
 ## Task boards
 
 [Task Board - Sprint #1](https://github.com/users/lkykathy/projects/1)
+
 [Task Board - Sprint #2](https://github.com/users/lkykathy/projects/2)
