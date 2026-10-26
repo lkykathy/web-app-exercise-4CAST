@@ -167,13 +167,13 @@ def build_outfits(candidates, *, weather, limit=5, quiz_answers=None):
         signature = tuple(sorted(ids))
         color_score, relationship = score_color(parts)
         dev = [abs(item["warmth_level"] - ideal) for _, item in parts]
-        look_weather_score = max(0, min(35, 35-6 * sum(dev) / len(parts) + sum(weather_score[i] for i in ids) / len(ids)))
+        look_weather_score = max(0, min(35, 35-6 * sum(dev) / len(parts) + sum(item_weather_scores[i] for i in ids) / len(ids)))
         mismatch_penalty = min(25, sum(max(0, d - 1) * 5 for d in dev))
         look_id = sha256(("|".join(signature)).encode()).hexdigest()[:16]
-        pool[signature] = dict(id=look_id, item_ids=ids, items=[dict(color=r, item=i) for r,i in parts],
+        pool[signature] = dict(id=look_id, item_ids=ids, parts=[dict(role=r, item=i) for r,i in parts],
                                relationship=relationship, score_breakdown=dict(weather=round(look_weather_score, 2),
                                                                                color=color_score,
-                                                                               weather_penalty=mismatch_penalty,
+                                                                               penalty=mismatch_penalty,
                                                                                completeness=15))
         if rules is not None:
             quiz_score, quiz_breakdown = score_quiz(parts, rules)
@@ -184,8 +184,8 @@ def build_outfits(candidates, *, weather, limit=5, quiz_answers=None):
             overlaps = [len(set(look["item_ids"]) & set(old["item_ids"])) /
                         len(set(look["item_ids"]) | set(old["item_ids"])) for old in selected]
             overlap = max(overlaps, default=0)
-            palette = {entry["item"]["color"] for entry in look["items"]}
-            same_palette = any(palette == {entry["item"]["color"] for entry in old["items"]} for old in selected)
+            palette = {entry["item"]["color"] for entry in look["parts"]}
+            same_palette = any(palette == {entry["item"]["color"] for entry in old["parts"]} for old in selected)
             same_style = any(look["relationship"] == old["relationship"] for old in selected)
             variety = max(0, 15 * (1 - overlap) - (3 if same_palette else 0) - (2 if same_style else 0))
             duplicate_penalty = 10 if overlap >= 0.75 else 5 if overlap >= 0.5 else 0
