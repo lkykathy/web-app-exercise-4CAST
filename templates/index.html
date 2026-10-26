@@ -17,7 +17,7 @@
 
         <!-- Date and location -->
          <div class="date-location">
-            <p class="current-date">Today</p>
+            <p class="current-date">{{ today_date }}</p>
             <a class="location" href="#">
                 {{ weather.place if weather else 'your location' }}
                 <span aria-hidden="true"></span>

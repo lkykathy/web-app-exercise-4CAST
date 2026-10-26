@@ -9,7 +9,7 @@ COLOR_WHEEL = {
     "yellow": 5, "yellow-green": 6, "green": 7, "blue-green": 8,
     "blue": 9, "blue-violet": 10, "violet": 11, "red-violet": 12,
 }
-QUIZ_WEIGHT = 0.45
+QUIZ_WEIGHT = 0.20
 MOOD_RULES = {
     'confident': {'colors': {'red', 'burgundy', 'black', 'navy'}, 'categories': {'blazer', 'dress-shirt', 'button-up-shirt', 'trousers', 'slacks', 'heels', 'loafers'}},
     'soft': {'colors': {'pink', 'cream', 'peach', 'lavender', 'white'}, 'categories': {'blouse', 'cardigan', 'sweater', 'skirt', 'flats'}},
@@ -25,10 +25,10 @@ PALETTE_RULES = {
     'playful & eclectic': {'colors': {'red', 'red-violet', 'pink', 'orange', 'yellow', 'lime', 'turquoise', 'purple', 'magenta'}},
 }
 STYLE_RULES = {
-    'minimalist': {'occasions': {'casual', 'smart-casual', 'business-casual'}, 'accessories': {'watch', 'belt', 'bag'}, 'layers': {'blazer', 'coat', 'vest'}, 'tops': {'button-up-shirt', 'sweater', 't-shirt', 'tank-top'}, 'bottoms': {'jeans', 'skirt', 'slacks', 'trousers'}, 'shoes': {'flats', 'loafers', 'sandals', 'sneakers'}},
-    'romantic': {'occasions': {'cocktail', 'formal', 'special-occasion'}, 'accessories': {'jewelry', 'scarf', 'bag'}, 'layers': {'coat', 'trench-coat'}, 'tops': {'blouse', 'bodysuit', 'cardigan', 'sweater'}, 'bottoms': {'skirt', 'slacks', 'trousers'}, 'shoes': {'flats', 'heels', 'sandals'}},
-    'streetwear': {'occasions': {'casual', 'loungewear'}, 'accessories': {'cap', 'hat', 'sunglasses', 'bag'}, 'layers': {'hoodie', 'sweatshirt', 'jacket', 'coat', 'vest'}, 'tops': {'crop-top', 't-shirt', 'tank-top'}, 'bottoms': {'jeans', 'joggers', 'shorts', 'sweatpants'}, 'shoes': {'boots', 'sneakers'}},
-    'classic': {'occasions': {'smart-casual', 'business-casual', 'business-formal', 'formal'}, 'accessories': {'watch', 'belt', 'tie', 'scarf'}, 'layers': {'blazer', 'trench-coat', 'coat'}, 'tops': {'blouse', 'button-up-shirt', 'dress-shirt', 'polo-shirt', 'sweater'}, 'bottoms': {'jeans', 'skirt', 'slacks', 'trousers'}, 'shoes': {'boots', 'flats', 'heels', 'loafers'}},
+    'minimalist': {'occasions': {'casual', 'smart-casual', 'business-casual'}, 'accessories': {'watch', 'belt', 'bag'}, 'layers': {'blazer', 'coat', 'vest'}},
+    'romantic': {'occasions': {'cocktail', 'formal', 'special-occasion'}, 'accessories': {'jewelry', 'scarf', 'bag'}, 'layers': {'cardigan', 'trench-coat'}},
+    'streetwear': {'occasions': {'casual', 'loungewear'}, 'accessories': {'cap', 'hat', 'sunglasses', 'bag'}, 'layers': {'jacket', 'vest'}},
+    'classic': {'occasions': {'smart-casual', 'business-casual', 'business-formal', 'formal'}, 'accessories': {'watch', 'belt', 'tie', 'scarf'}, 'layers': {'blazer', 'trench-coat', 'coat'}},
 }
 ENERGY_RULES = {
     'bold & powerful': {'colors': {'red', 'black', 'burgundy', 'purple', 'magenta'}, 'materials': {'leather', 'velvet', 'denim'}},
@@ -39,7 +39,7 @@ ENERGY_RULES = {
 
 
 def _position(item):
-    return item.get("color_wheel_pos", COLOR_WHEEL.get(item.get("color")))
+    return item.get("color_wheel_pos", COLOR_WHEEL.get("color"))
 
 
 def color_distance(a, b):
@@ -116,28 +116,29 @@ def score_quiz(parts, rules):
     def fraction(values):
         return sum(values) / len(values) if values else 0
     def color_match(rule):
-        checks = [fraction([item.get("color") in rule["colors"] for item in items])]
-        if "lightness" in rule:
-            checks.append(fraction([item.get("color_lightness") in rule["lightness"] for item in items]))
+        checks = [fraction([item.get('color') in rule['colors'] for item in items])]
+        if 'lightness' in rule:
+            checks.append(fraction([item.get('color_lightness') in rule['lightness'] for item in items]))
         return sum(checks) / len(checks)
-    mood = (color_match(rules["mood"]) + fraction([item.get("category") in rules["mood"]["categories"] for item in items])) / 2
-    palette = color_match(rules["palette"])
-    accessories = [item for role, item in parts if role == "accessory"]
-    layers = [item for role, item in parts if role == "outerwear"]
-    style_checks = [fraction([item.get("category") in rules["style"]["accessories"] for item in accessories])]
-    for role, key in (("top", "tops"), ("bottom", "bottoms"), ("shoes", "shoes")):
-        style_checks.append(fraction([item.get("category") in rules["style"][key] for item_role, item in parts if item_role == role]))
+    mood = (color_match(rules['mood']) + fraction([
+        item.get('category') in rules['mood']['categories'] for item in items
+    ])) / 2
+    palette = color_match(rules['palette'])
+    accessories = [item for role, item in parts if role == 'accessory']
+    layers = [item for role, item in parts if role == 'outerwear']
+    style_checks = [fraction([item.get('category') in rules['style']['accessories'] for item in accessories])]
     if layers:
-        style_checks.append(fraction([item.get("category") in rules["style"]["layers"] for item in layers]))
+        style_checks.append(fraction([item.get('category') in rules['style']['layers'] for item in layers]))
     def occasion_match(item):
-        labels = item.get("occasion") or []
+        labels = item.get('occasion') or []
         if isinstance(labels, str):
             labels = [labels]
-        return bool(set(labels) & rules["style"]["occasions"])
+        return bool(set(labels) & rules['style']['occasions'])
     style_checks.append(fraction([occasion_match(item) for item in items]))
     style = sum(style_checks) / len(style_checks)
-    energy = (color_match(rules["energy"]) + fraction([bool(set(item.get("material") or []) & rules["energy"]["materials"]) for item in items])) / 2
-    breakdown = {key: round(value * 25, 2) for key, value in [("mood", mood), ("palette", palette), ("style", style), ("energy", energy)]}
+    energy = (color_match(rules['energy']) + fraction([bool(set(item.get('material') or []) & rules['energy']['materials']) for item in items])) / 2
+    breakdown = {key: round(value * 25, 2) for key, value in
+                 [('mood', mood), ('palette', palette), ('style', style), ('energy', energy)]}
     return round(sum(breakdown.values()), 2), breakdown
 
 
@@ -146,47 +147,34 @@ def build_outfits(candidates, *, weather, limit=5, quiz_answers=None):
     args = _weather_args(weather)
     effective = args["feels_like"] if args["feels_like"] is not None else args["temp"]
     low, high = get_warmth_range(effective, unit=args["unit"])
+    ideal = (low+high) / 2
     groups = {key: [] for key in {"tops", "bottoms", "shoes", "outerwear", "accessories"}}
+    item_weather_scores = {}
     for item in candidates:
         main = item.get("main_category") or CATEGORY_TO_MAIN.get(item.get("category"))
-        if item.get("category") == "cardigan":
-            main = "tops"
-        elif item.get("category") in {"hoodie", "sweatshirt", "jacket", "blazer", "coat", "trench-coat", "vest"}:
-            main = "outerwear"
         if main not in groups or item.get("is_available") is False:
             continue
-        if main in {"tops", "outerwear"}:
-            suit = get_weather_suit(dict(item, warmth_level=low), **args)
-        else:
-            suit = get_weather_suit(item, **args)
-        if not suit["suitable"]:
-            continue
+        suit = get_weather_suit(item, **args)
+        item_weather_scores[str(item["_id"])] = suit["score"]
         groups[main].append(item)
     pool = {}
-    for top, bottom, shoes, accessory, outerwear in product(groups["tops"], groups["bottoms"],
-                                                            groups["shoes"], groups["accessories"], [None] + groups["outerwear"]):
-        if outerwear is not None and outerwear.get("category") in {"hoodie", "sweatshirt"}:
-            if top.get("category") not in {"t-shirt", "tank-top", "crop-top", "bodysuit"}:
-                continue
-        effective = top["warmth_level"]
-        if outerwear is not None:
-            effective = min(5, max(effective, outerwear["warmth_level"]) + 1)
-        if not low <= effective <= high:
-            continue
+    for top, bottom, shoes, accessory, outerwear in product(
+        groups["tops"], groups["bottoms"], groups["shoes"], groups["accessories"], [None] + groups["outerwear"]):
         parts = [("top", top), ("bottom", bottom), ("shoes", shoes), ("accessory", accessory)]
         if outerwear is not None:
             parts.append(("outerwear", outerwear))
         ids = [str(item["_id"]) for _, item in parts]
         signature = tuple(sorted(ids))
         color_score, relationship = score_color(parts)
-        weather_score = 0
-        mismatch_penalty = 0
+        dev = [abs(item["warmth_level"] - ideal) for _, item in parts]
+        look_weather_score = max(0, min(35, 35-6 * sum(dev) / len(parts) + sum(item_weather_scores[i] for i in ids) / len(ids)))
+        mismatch_penalty = min(25, sum(max(0, d - 1) * 5 for d in dev))
         look_id = sha256(("|".join(signature)).encode()).hexdigest()[:16]
         pool[signature] = dict(id=look_id, item_ids=ids, parts=[dict(role=r, item=i) for r,i in parts],
-                               relationship=relationship, score_breakdown=dict(weather=round(weather_score, 2),
+                               relationship=relationship, score_breakdown=dict(weather=round(look_weather_score, 2),
                                                                                color=color_score,
-                                                                               weather_penalty=mismatch_penalty,
-                                                                               completeness=0))
+                                                                               penalty=mismatch_penalty,
+                                                                               completeness=15))
         if rules is not None:
             quiz_score, quiz_breakdown = score_quiz(parts, rules)
             pool[signature].update(quiz_score=quiz_score, quiz_breakdown=quiz_breakdown)
@@ -203,7 +191,8 @@ def build_outfits(candidates, *, weather, limit=5, quiz_answers=None):
             duplicate_penalty = 10 if overlap >= 0.75 else 5 if overlap >= 0.5 else 0
             breakdown  = look["score_breakdown"]
             breakdown.update(variety=round(variety, 2), similarity_penalty=duplicate_penalty)
-            look["score"] = round((35 * breakdown["color"] / 35 + 20 * max(0, breakdown["variety"] - duplicate_penalty) / 15) / (1 - QUIZ_WEIGHT), 2)
+            look["score"] = round(max(0, min(100, breakdown["weather"] + breakdown["color"] + 15 + 
+                                             breakdown["variety"] - breakdown["penalty"] - duplicate_penalty)), 2)
             look["reasoning"] = f"{look['relationship'].capitalize()}; weather suitable; includes an accessory."
             look["ranking_score"] = round((1 - QUIZ_WEIGHT) * look["score"] + QUIZ_WEIGHT * look["quiz_score"], 2) if rules is not None else look["score"]
         winner = min(pool.values(), key=lambda look: (-look["ranking_score"], look["id"]))
