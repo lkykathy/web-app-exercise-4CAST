@@ -158,7 +158,7 @@ def mood():
         except WeatherError:
             weather = {"temperature_fahrenheit": 70, "feels_like_fahrenheit": 70}
 
-        looks = get_outfits(weather, limit=5, quiz_answers=quiz_answers)
+        looks = get_outfits(weather, limit=10, quiz_answers=quiz_answers)
         mood_outfits = [serialize_document(look) for look in looks]
         favorites = list(db.favorite_outfits.find({}))
 

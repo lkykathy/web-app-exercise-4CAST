@@ -108,19 +108,7 @@
              <!-- Outfit recommendations by occasion -->
               <section class="occasion-section" id="outfits" aria-labelledby="occasion-title">
                 <div class="section-heading">
-                    <h2 id="occasion-title">Outfits based on occasion</h2>
-                    <button class="refresh-button" type="button" aria-label="Refresh outfit recommendations">↻</button>
-                </div>
-
-                <div class="occasion-filters" aria-label="Choose an occasion">
-                    <button class="occasion-button active" type="button"
-                            aria-pressed="true">Casual</button>
-                    <button class="occasion-button" type="button"
-                            aria-pressed="false">Smart Casual</button>
-                    <button class="occasion-button" type="button"
-                            aria-pressed="false">Formal</button>
-                    <button class="occasion-button" type="button"
-                            aria-pressed="false">Cocktail</button>
+                    <h2 id="occasion-title">Outfits based on weather</h2>
                 </div>
 
                 <div class="outfit-cards" style="display: flex; flex-direction: column; gap: 15px;">
@@ -130,7 +118,6 @@
                                 <article class="outfit-card" style="width: 100%;">
                                     <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee;">
                                         <h3 style="margin: 0;">Look {{ occasion | replace('-', ' ') | title }}</h3>
-                                        <span style="font-size: 12px; color: #777;"> Score: {{ look['score']}}</span>
                                         <button onclick='saveToFavorites({{ look | tojson }})' 
                                             style="background: none; border: none; cursor: pointer; font-size: 18px; transition: transform 0.2s;"
                                             onmouseout="this.style.transform='scale(1)'" title="Save to Favorites">❤️</button>

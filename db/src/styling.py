@@ -183,7 +183,7 @@ def build_outfits(candidates, *, weather, limit=5, quiz_answers=None):
         mismatch_penalty = 0
         look_id = sha256(("|".join(signature)).encode()).hexdigest()[:16]
         pool[signature] = dict(id=look_id, item_ids=ids, parts=[dict(role=r, item=i) for r,i in parts],
-                               relationship=relationship, score_breakdown=dict(weather=round(look_weather_score, 2),
+                               relationship=relationship, score_breakdown=dict(weather=round(weather_score, 2),
                                                                                color=color_score,
                                                                                weather_penalty=mismatch_penalty,
                                                                                completeness=0))
