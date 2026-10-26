@@ -1,6 +1,6 @@
 from hashlib import sha256
 from itertools import combinations, product
-from db.src.clothing_db import search_clothing, get_weather_suit, get_warmth_range
+from db.src.clothing_db import search_clothing, get_weather_suit
 from db.src.tagging import CATEGORY_TO_MAIN, COLOR_WHEEL as COMMON_COLOR_WHEEL
 
 COLOR_WHEEL = {
@@ -9,7 +9,7 @@ COLOR_WHEEL = {
     "yellow": 5, "yellow-green": 6, "green": 7, "blue-green": 8,
     "blue": 9, "blue-violet": 10, "violet": 11, "red-violet": 12,
 }
-QUIZ_WEIGHT = 0.20
+QUIZ_WEIGHT = 0.45
 MOOD_RULES = {
     'confident': {'colors': {'red', 'burgundy', 'black', 'navy'}, 'categories': {'blazer', 'dress-shirt', 'button-up-shirt', 'trousers', 'slacks', 'heels', 'loafers'}},
     'soft': {'colors': {'pink', 'cream', 'peach', 'lavender', 'white'}, 'categories': {'blouse', 'cardigan', 'sweater', 'skirt', 'flats'}},
@@ -145,36 +145,32 @@ def score_quiz(parts, rules):
 def build_outfits(candidates, *, weather, limit=5, quiz_answers=None):
     rules = _quiz_rules(quiz_answers)
     args = _weather_args(weather)
-    effective = args["feels_like"] if args["feels_like"] is not None else args["temp"]
-    low, high = get_warmth_range(effective, unit=args["unit"])
-    ideal = (low+high) / 2
     groups = {key: [] for key in {"tops", "bottoms", "shoes", "outerwear", "accessories"}}
-    item_weather_scores = {}
     for item in candidates:
         main = item.get("main_category") or CATEGORY_TO_MAIN.get(item.get("category"))
         if main not in groups or item.get("is_available") is False:
             continue
         suit = get_weather_suit(item, **args)
-        item_weather_scores[str(item["_id"])] = suit["score"]
+        if not suit["suitable"]:
+            continue
         groups[main].append(item)
     pool = {}
-    for top, bottom, shoes, accessory, outerwear in product(groups["tops", groups["bottoms"],
-                                                            groups["shoes"], groups["accessories"], [None] + groups["outerwear"]]):
+    for top, bottom, shoes, accessory, outerwear in product(groups["tops"], groups["bottoms"],
+                                                            groups["shoes"], groups["accessories"], [None] + groups["outerwear"]):
         parts = [("top", top), ("bottom", bottom), ("shoes", shoes), ("accessory", accessory)]
         if outerwear is not None:
             parts.append(("outerwear", outerwear))
         ids = [str(item["_id"]) for _, item in parts]
         signature = tuple(sorted(ids))
         color_score, relationship = score_color(parts)
-        dev = [abs(item["warmth_level"] - ideal) for _, item in parts]
-        weather_score = max(0, min(35, 35-6 * sum(dev) / len(parts) + sum(item_weather_scores[i] for i in ids) / len(ids)))
-        mismatch_penalty = min(25, sum(max(0, d - 1) * 5 for d in dev))
+        weather_score = 0
+        mismatch_penalty = 0
         look_id = sha256(("|".join(signature)).encode()).hexdigest()[:16]
         pool[signature] = dict(id=look_id, item_ids=ids, items=[dict(role=r, item=i) for r, i in parts],
                                relationship=relationship, score_breakdown=dict(weather=round(weather_score, 2),
                                                                                color=color_score,
                                                                                weather_penalty=mismatch_penalty,
-                                                                               completeness=15))
+                                                                               completeness=0))
         if rules is not None:
             quiz_score, quiz_breakdown = score_quiz(parts, rules)
             pool[signature].update(quiz_score=quiz_score, quiz_breakdown=quiz_breakdown)
@@ -191,8 +187,7 @@ def build_outfits(candidates, *, weather, limit=5, quiz_answers=None):
             duplicate_penalty = 10 if overlap >= 0.75 else 5 if overlap >= 0.5 else 0
             breakdown  = look["score_breakdown"]
             breakdown.update(variety=round(variety, 2), similarity_penalty=duplicate_penalty)
-            look["score"] = round(max(0, min(100, breakdown["weather"] + breakdown["color"] + 15 + 
-                                             breakdown["variety"] - breakdown["weather_penalty"] - duplicate_penalty)), 2)
+            look["score"] = round((35 * breakdown["color"] / 35 + 20 * max(0, breakdown["variety"] - duplicate_penalty) / 15) / (1 - QUIZ_WEIGHT), 2)
             look["reasoning"] = f"{look['relationship'].capitalize()}; weather suitable; includes an accessory."
             look["ranking_score"] = round((1 - QUIZ_WEIGHT) * look["score"] + QUIZ_WEIGHT * look["quiz_score"], 2) if rules is not None else look["score"]
         winner = min(pool.values(), key=lambda look: (-look["ranking_score"], look["id"]))
