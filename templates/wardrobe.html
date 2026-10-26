@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>4CAST | Wardrobe</title>
 
-    <link rel="stylesheet" href="../static/css/styles.css">
-    <link rel="stylesheet" href="../static/css/wardrobe.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/wardrobe.css') }}">
 
 </head>
 <body>
@@ -15,63 +15,64 @@
         <span>WARDROBE</span>
     </header>
     <main class="page wardrobe-page">
-        <form class="wardrobe-search">
-            <input 
-                type="search"
-                name="search"
-                placeholder="Search"
-                aria-label="Search wardrobe"
-                >
+        <form class="wardrobe-search" id="wardrobe-search-form">
+            <select id="search-field" aria-label="Search by">
+                <option value="name">Name</option>
+                <option value="brand">Brand</option>
+                <option value="color">Color</option>
+                <option value="warmth">Warmth Level</option>
+            </select>
+
+            <input type="search" id="wardrobe-search-input" placeholder="search your wardrobe..." aria-label="Search wardrobe">
         </form>
+        
         <section class="wardrobe-grid" aria-label="Your wardrobe">
+            {% if items %}
+                {% for item in items%}
+                    <article class="clothing-card"
+                                    data-name="{{ (item.name or '')|lower }}"
+                                    data-brand="{{ (item.brand or '')|lower }}"
+                                    data-color="{{ (item.color or '')|lower }}"
+                                    data-warmth="{{ item.warmth_level if item.warmth_level is not none else '' }}">
+                        <a href="{{ url_for('garment_details', item_id=item._id)}}">
+                            <div class="clothing-image">
+                                <img src="{{ item.image_url }}" alt="{{ item.name or 'Clothing' }}" style="width: 100%; height: 100%; object-fit: contain;">
+                            </div>
+                        </a>
+
+                        <div style="padding: 10px;">
+                            <h3 style="margin: 0; font-size: 14px;">
+                                {{ item.name or 'Unnamed Item' }}
+                            </h3>
+
+                            <p style="margin: 0; color: #777; font-size: 11px;">
+                                {{ item.color }}
+                            </p>
+
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <form method="POST" action="{{ url_for('wear', item_id=item._id) }}" style="margin: 0;">
+                                    <button type = "submit" style="padding: 5px 8px; font-size: 10px; cursor: pointer; background: var(--plum); color: white; border: none; border-radius: 2px;">
+                                        Wore It
+                                    </button>
+                                </form>
+                                <form action="{{ url_for('delete', item_id=item['_id'])}}" method="POST" onsubmit="return confirm('are you sure you want to delete this item?');">
+                                    <button type="submit" class="delete-button">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </article>
+                {% endfor %}
+            {% else %}
+                <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
+                    <p>Your wardrobe is empty</p>
+                    <a href="{{ url_for('add') }}" style="color: #4A3C51; text-decoration: underline;">Add a garment</a>
+                </div>
+            {% endif %} 
+            <p id="no-search-results" hidden>No matching items found</p>  
             
-            <article class="clothing-card">
-                <a href="garment-details.html">
-                    <div class="clothing-image">
-                        <img src="../images/sweater-placeholder.jpg" alt="Gray sweater">
-                    </div>
-                </a>
-            </article>
-
-            <article class="clothing-card">
-                <a href="garment-details.html">
-                    <div class="clothing-image">
-                        <span>CLOTHING</span>
-                    </div>
-                </a>
-            </article>
-
-            <article class="clothing-card">
-                <a href="garment-details.html">
-                    <div class="clothing-image">
-                        <span>CLOTHING</span>
-                    </div>
-                </a>
-            </article>
-
-            <article class="clothing-card">
-                <a href="garment-details.html">
-                    <div class="clothing-image">
-                        <span>CLOTHING</span>
-                    </div>
-                </a>
-            </article>
-
-            <article class="clothing-card">
-                <a href="garment-details.html">
-                    <div class="clothing-image">
-                        <span>CLOTHING</span>
-                    </div>
-                </a>
-            </article>
-
-            <article class="clothing-card">
-                <a href="garment-details.html">
-                    <div class="clothing-image">
-                        <span>CLOTHING</span>
-                    </div>
-                </a>
-            </article>
+            
         </section>
 
         <div class="wardrobe-filters" aria-label="Filter wardrobe">
@@ -87,13 +88,13 @@
     <footer class="navbar">
         <a
             class="logo"
-            href="index.html"
+            href="{{ url_for('home') }}"
             aria-label="4CAST home"
         >
             4CAST
         </a>
         <nav aria-label="Main navigation">
-            <a href="index.html">
+            <a href="{{ url_for('home')}}">
                 home
             </a>
             <a
@@ -105,7 +106,7 @@
             </a>
             <a
                 class="add-button"
-                href="add-garment.html"
+                href="{{ url_for('add') }}"
                 aria-label="Add a garment"
             >
                 +
@@ -113,11 +114,37 @@
             <a href="#outfits">
                 outfits
             </a>
-            <a href="#circularity">
+            <a href="{{ url_for('circularity')}}">
                 circularity
             </a>
 
         </nav>
     </footer>
+
+    <script>
+        const searchForm = document.getElementById("wardrobe-search-form");
+        const searchInput = document.getElementById("wardrobe-search-input");
+        const searchField = document.getElementById("search-field");
+        const clothingCards = document.querySelectorAll(".clothing-card");
+        const noResults = document.getElementById("no-search-results");
+
+        function searchWardrobe() {
+            const query = searchInput.value.trim().toLowerCase();
+            const field = searchField.value;
+            let visibleCount=0;
+
+            clothingCards.forEach(card=> 
+                {const value = card.dataset[field] || ""; 
+                const matches = value.includes(query);
+                card.hidden = !matches;
+                if(matches) {
+                    visibleCount++;
+                }});
+                noResults.hidden = query === "" || visibleCount>0;
+        }
+        searchForm.addEventListener("submit", event=> {event.preventDefault(); searchWardrobe();});
+        searchInput.addEventListener("input", searchWardrobe);
+        searchField.addEventListener("change", searchWardrobe);
+    </script>
 </body>
 </html>

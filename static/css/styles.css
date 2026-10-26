@@ -19,7 +19,7 @@
     --accent: #D2C4DF;
 
     /* Typography */
-    --font-body: 'DM Sans', sans serif;
+    --font-body: 'DM Sans', sans-serif;
     --font-editorial: 'Cormorant Garamond', serif;
 
     /* Layout */
@@ -778,4 +778,202 @@ button:focus-visible,
 a:focus-visible {
     outline: 2px solid var(--sage-dark);
     outline-offset: 3px;
+}
+
+.form-container{
+    max-width: 500px;
+    margin: 20px auto;
+    padding: 24px;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+
+}
+
+.form-container h2 {
+    margin-top: 0;
+    margin-bottom: 24px;
+    font-family: var(--font-editorial);
+    font-size: 32px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.5px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="file"],
+.form-group select{
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--soft-radius);
+    background-color: var(--background);
+    color: var(--text);
+    font-size: 13px;
+    transition: border-color 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--plum);
+}
+
+.form-group input[type="file"]::file-selector-button {
+    padding: 8px 12px;
+    border-radius: var(--soft-radius);
+    background-color: var(--plum);
+    color: var(--surface);
+    border: none;
+    cursor: pointer;
+    margin-right: 12px;
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 600;
+    transition: opacity 0.2s;
+}
+
+.form-group input[type="file"]::file-selector-button:hover{
+    opacity: 0.8;
+}
+
+.error-banner {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 12px;
+    border-radius: var(--soft-radius);
+    margin-bottom: 20px;
+    border: 1px solid #ef9a9a;
+    font-size: 12px;
+    font-family: var(--font-body);
+}
+
+.submit-bin {
+    width: 100%;
+    padding: 16px;
+    margin-top: 12px;
+    background-color: var(--plum);
+    color: var(--surface);
+    border: none;
+    border-radius: var(--soft-radius);
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.submit-bin:hover {
+    opacity: 0.9;
+}
+
+.cancel-link {
+    display: block;
+    text-align: center;
+    margin-top: 16px;
+    color: var(--muted);
+    font-size: 11px;
+    text-decoration: underline;
+}
+
+.outfits-page {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.section-header {
+    display: 20px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid var(--border, #eee);
+}
+
+.section-header h2 {
+    margin: 0;
+    font-family: var(--font-editorial, serif);
+    color: var(--text, #333);
+}
+
+.see-more-btn {
+    background: var(--plum, #4A3C51);
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: opacity 0.2s;
+}
+
+.see-more-btn:hover {
+    opacity: 0.8;
+}
+
+.outfit-scroll-container {
+    max-height: 45vh;
+    overflow-y: auto;
+    transition: max-height 0.4s ease-in-out;
+    margin-bottom: 40px;
+    padding-right: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--plum) var(--background);
+}
+
+.outfit-scroll-container.expanded {
+    max-height: 5000px;
+}
+
+.outfit-card {
+    background: var(--surface, #fff);
+    border: 1px solid var(--border, #e0e0e0);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.outfit-items {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+}
+
+.outfit-item {
+    text-align: center;
+    min-width: 80px;
+}
+
+.outfit-item img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 4px;
+    background: #f0f0f0;
+}
+
+.empty-message {
+    padding: 30px;
+    text-align: center;
+    color: #777;
+    background: #f9f9f9;
+    border-radius: 8px;
 }

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title> 4CAST | Add Garmnet</title>
+
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css')}}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/wardrobe.css')}}">
+    </head>
+
+    <body>
+        <header class="brand-heading">
+            <h1>4CAST</h1>
+        </header>
+
+        <main class="page">
+            <div class="form-container">
+                <h2>New Item</h2>
+                {% if error %}
+                    <div class="error-banner">
+                        <strong>Error:</strong> {{ error }}
+                    </div>
+                {% endif%}
+
+                <form method="POST" action="{{ url_for('add') }}" enctype="multipart/form-data">
+                    <!--photo-->
+                    <div class="form-group">
+                        <label for="image_file">Photo (Required)</label>
+                        <input type="file" id="image_file" name="image_file" accept="image/*" capture="environment" required>
+                    </div>
+                    <!--item name-->
+                    <div class="form-group">
+                        <label for="name">Item Name (Optional)</label>
+                        <input type="text" id="name" name="name" value="{{ item.get('name', '') }}" placeholder="e.g., Purple NYU Shirt" required>
+                    </div>
+                    <!--color-->
+                    <div class="form-group">
+                        <label for="color">Color (Required)</label>
+                        <input type="text" id="color" name="color" value="{{ item.get('color', '')}}" placeholder="e.g., Purple" required>
+                    </div>
+                    <!--brand-->
+                    <div class="form-group">
+                        <label for="brand">Brand</label>
+                        <input type="text" id="brand" name="brand" value="{{ item.get('brand', '')}}" placeholder="e.g., NYU merch">
+                    </div>
+                    <!--meterial-->
+                    <div class="form-group">
+                        <label for="material">Material (Optional)</label>
+                        <input type="text" id="material" name="material" value="{{ item.get('material', '')}}" placeholder="e.g., cotton, denim, wool">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="warmth_level">Warmth level(1-5)</label>
+                        <select id="warmth_level" name="warmth_level" required>
+                            <option value="" disabled {% if not item.get('warmth_level') %}selected{% endif %}>Select warmth...</option>
+                            <option value="1" {% if item.get('warmth_level')|string=='1' %}selected{% endif %}>1 - Very Light (Summer)</option>
+                            <option value="2" {% if item.get('warmth_level')|string=='2' %}selected{% endif %}>2 - Light (Spring)</option>
+                            <option value="3" {% if item.get('warmth_level')|string=='3' %}selected{% endif %}>3 - Medium (Fall)</option>
+                            <option value="4" {% if item.get('warmth_level')|string=='4' %}selected{% endif %}>4 - Warm (Winter)</option>
+                            <option value="5" {% if item.get('warmth_level')|string=='5' %}selected{% endif %}>5 - Very Warm (Deep Winter)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="category">Category (Required)</label>
+                        <select id="category" name="category" required>
+                            <option value="">Select a category...</option>
+                            <option value="t-shirt" {% if item.get('category') == 't-shirt' %}selected{% endif %}>T-Shirt</option>
+                            <option value="blouse" {% if item.get('category') == 'blouse' %}selected{% endif %}>Blouse</option>
+                            <option value="sweater" {% if item.get('category') == 'sweater' %}selected{% endif %}>Sweater</option>
+                            <option value="button-up-shirt" {% if item.get('category') == 'button-up-shirt' %}selected{% endif %}>Button-Up Shirt</option>
+                            <option value="jeans" {% if item.get('category') == 'jeans' %}selected{% endif %}>Jeans</option>
+                            <option value="trousers" {% if item.get('category') == 'trousers' %}selected{% endif %}>Trousers</option>
+                            <option value="skirt" {% if item.get('category') == 'skirt' %}selected{% endif %}>Skirt</option>
+                            <option value="shorts" {% if item.get('category') == 'shorts' %}selected{% endif %}>Shorts</option>
+                            <option value="dress" {% if item.get('category') == 'dress' %}selected{% endif %}>Dress</option>
+                            <option value="jacket" {% if item.get('category') == 'jacket' %}selected{% endif %}>Jacket</option>
+                            <option value="coat" {% if item.get('category') == 'coat' %}selected{% endif %}>Coat</option>
+                            <option value="sneakers" {% if item.get('category') == 'sneakers' %}selected{% endif %}>Sneakers</option>
+                            <option value="boots" {% if item.get('category') == 'boots' %}selected{% endif %}>Boots</option>
+                            <option value="heels" {% if item.get('category') == 'heels' %}selected{% endif %}>Heels</option>
+                            <option value="bag" {% if item.get('category') == 'bag' %}selected{% endif %}>Bag</option>
+                            <option value="jewelry" {% if item.get('category') == 'jewelry' %}selected{% endif %}>Jewelry</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        Save to Wardrobe
+                    </button>
+
+                    <a href="{{ url_for('show_wardrobe') }}" class="cancel-link">
+                        Cancel
+                    </a>
+                </form>
+            </div>
+        </main>
+
+        <footer class="navbar">
+            <a class="logo" href="{{ url_for('home') }}" aria-label="4CAST home">4CAST</a>
+            <nav aria-label="Main navigation">
+                <a href="{{ url_for('home')}}">home</a>
+                <a href="{{ url_for('show_wardrobe') }}">wardrobe</a>
+                <a class="active" href=" {{ url_for('add') }}" aria-label="Add a garment">+</a>
+                <a href="{{ url_for('outfits_page') }}">outfits</a>
+                <a href="{{ url_for('circularity') }}">circularity</a>
+            </nav>
+        </footer>
+    </body>
+</html>
