@@ -15,6 +15,7 @@
     <main class="page circularity-page">
         <h2 class="circularity-title">WEAR MORE. WASTE LESS.</h2>
         <section class="wardrobe-summary">
+        {% set needs_wash = data.repair_and_care | selectattr("care_status", "equalto", "needs-wash") | list %}
             <h3>Your Wardrobe</h3>
             <p class="piece-count">
                 <span>{{ data.summary.pieces }}</span> PIECES
@@ -26,7 +27,7 @@
                 </div>
                 <div>
                     <p>Ready to Rewear</p>
-                    <span>{{ data.summary.read_to_rewear }}</span>
+                    <span>{{ data.summary.pieces - needs_wash|length }}</span>
                 </div>
             </div>
         </section>
@@ -47,23 +48,41 @@
         </section>
 
         <section class="dashboard">
-            <h2>Repair &amp; Care</h2>
+            <div class="dashboard-row" style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>Repair &amp; Care</h2>
+                {% set needs_wash = data.repair_and_care | selectattr("care_status", "equalto", "needs-wash") | list %}
+                {% if needs_wash %}
+                    <form method="POST" action="{{ url_for('wash_all') }}" style="margin: 0;">
+                        <button type="submit" style="padding: 5px 12px; background: var(--plum); color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;">
+                            Wash All
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+
             <div class="dashboard-box">
-                {% set needs_care = data.repair_and_care | selectattr("care_status", "ne", "ready") | list %}
-                {% if needs_care %}
-                    {% for item in needs_care %}
+                {% if needs_wash %}
+                    {% for item in needs_wash %}
                         <div class="dashboard-row" style="display: flex; justify-content: space-between; align-items: center;">
-                            <span>{{ item.name or 'Unnamed Item' }}</span>
-                            <span style="font-size: 12px; color: #c62828; text-transform: capitalize;">
+                            <span>{{ item.name or 'Unamed Item' }}</span>
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <span style="font-size: 12px; color: #c62828; text-transform: capitalize;">
                                 {{ item.care_status.replace('-', ' ') }}
-                            </span>
+                                </span>
+                                <!--individual wash buttons-->
+                                <form method="POST" action="{{ url_for('wash_item', item_id=item.item_id) }}" style="margin: 0;">
+                                    <button type="submit" style="padding: 4px 8px; background: #e0e0e0; color: #333; border: none; border-radius: 4 px; font-size: 11px; cursor: pointer;">
+                                        Washed
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     {% endfor %}
                 {% else %}
-                    <div class="dashboard-row">
+                    <div class="dashboard-row" style="color: #777; font-style: italic;">
                         All items are clean and ready to wear!
                     </div>
-                {% endif %}        
+                {% endif %}    
             </div>
         </section>
 
@@ -102,7 +121,7 @@
             >
                 +
             </a>
-            <a href="#outfits">outfits</a>
+            <a href="{{ url_for('outfits_page') }}">outfits</a>
             <a
                 class="active"
                 href="{{ url_for('circularity') }}"

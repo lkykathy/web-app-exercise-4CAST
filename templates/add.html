@@ -44,6 +44,11 @@
                         <label for="brand">Brand</label>
                         <input type="text" id="brand" name="brand" value="{{ item.get('brand', '')}}" placeholder="e.g., NYU merch">
                     </div>
+                    <!--meterial-->
+                    <div class="form-group">
+                        <label for="material">Material (Optional)</label>
+                        <input type="text" id="material" name="material" value="{{ item.get('material', '')}}" placeholder="e.g., cotton, denim, wool">
+                    </div>
 
                     <div class="form-group">
                         <label for="warmth_level">Warmth level(1-5)</label>
@@ -97,7 +102,7 @@
                 <a href="{{ url_for('home')}}">home</a>
                 <a href="{{ url_for('show_wardrobe') }}">wardrobe</a>
                 <a class="active" href=" {{ url_for('add') }}" aria-label="Add a garment">+</a>
-                <a href="{{ url_for('recommend') }}">outfits</a>
+                <a href="{{ url_for('outfits_page') }}">outfits</a>
                 <a href="{{ url_for('circularity') }}">circularity</a>
             </nav>
         </footer>

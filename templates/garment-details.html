@@ -17,7 +17,7 @@
             <span>Information</span>
             <span>Outfit</span>
         </div>
-        <section class="garment-info">
+        <section class="garment-info", id="view-mode">
             <h2>Occasion Info</h2>
             <div class="info-row">
                 <strong>Season:</strong> {{item.season | join(', ') if item.season else 'None' }}
@@ -25,6 +25,7 @@
             <div class="info-row">
                 <Strong>Occasion:</Strong> {{ item.occasion | join(', ') if item.occasion else 'None'}}
             </div>
+            
             <h2>Item Info</h2>
             <div class="info-row">
                 <strong>Category:</strong> {{ item.category or 'None' }}
@@ -36,50 +37,105 @@
                 <strong>Material:</strong> {{ item.material | join(', ') if item.material else 'None' }}
             </div>
             <div style="margin-top: 20px; display: flex; gap: 10px;">
-                <a href="{{ url_for('edit', item_id=item._id) }}" style="padding: 10px 15px; background: var(--plum); color: white; text-decoration: none; border-radius: 5px; font-size: 12px;">
+                <button onclick="toggleEdit()" style="padding: 10px 15px; background: var(--plum); color: white; text-decoration: none; border-radius: 5px; font-size: 12px; border: none; cursor: pointer;">
                     Edit item
-                </a>
+                </button>
                 <a href="{{ url_for('show_wardrobe') }}" style="padding: 10px 15px; border: 1px solid var(--border); text-decoration: none; border-radius: 5px; font-size: 12px; color: var(--text);">
                     Back to Wardrobe
                 </a>
             </div>
         </section>
 
+        <section class="garment-info" id="edit-mode" style="display: none;">
+            <h2>Edit Item</h2>
+            <form method="POST" action="{{ url_for('edit', item_id=item._id) }}">
+                <div class="info-row" style="display: flex; flex-direction: column; gap: 5px">
+                    <label><strong>Name:</strong></label>
+                    <input type="text" name="name" value="{{ item.name or ''}}" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                <div class="info-row" style="display: flex; flex-direction: column; gap: 5px">
+                    <label><strong>Color:</strong></label>
+                    <input type="text" name="color" value="{{ item.color or ''}}" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                <div class="info-row" style="display: flex; flex-direction: column; gap: 5px">
+                    <label><strong>Brand:</strong></label>
+                    <input type="text" name="brand" value="{{ item.brand or ''}}" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                <div class="info-row" style="display: flex; flex-direction: column; gap: 5px">
+                    <label><strong>Warmth (1-5):</strong></label>
+                    <input type="number" name="warmth_level" min="1" value="{{ item.warmth_level}}" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                <div class="info-row" style="display: flex; flex-direction: column; gap: 5px">
+                    <label><strong>Category:</strong></label>
+                    <input type="text" name="category" value="{{ item.category or ''}}" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <input type="checkbox" name="is_available" id="is_available" {% if item.is_available %}checked{% endif %}>
+                    <label for="is_available">Item is available to wear</label>
+                </div>
+
+                <div style="margin-top: 20px; display: flex; gap: 10px;">
+                    <button type="submit" style="padding: 10px 15px; background: var(--plum); color: white; border: none; border-radius: 5px; font-size: 12px; cursor: pointer;">
+                        Save Changes
+                    </button>
+                    <button type="button" onclick="toggleEdit()" style="padding: 10px 15px; border: 1px solid var(--border); background: none; border-radius: 5px; font-size: 12px; cursor: pointer;">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </section>
+
     </main>
     <footer class="navbar">
         <a
             class="logo"
-            href="index.html"
+            href="{{ url_for('home') }}"
             aria-label="4CAST home"
         >
             4CAST
         </a>
         <nav aria-label="Main navigation">
-            <a href="index.html">
+            <a href="{{ url_for('home') }}">
                 home
             </a>
             <a
                 class="active"
-                href="wardrobe.html"
+                href="{{ url_for('show_wardrobe') }}"
                 aria-current="page"
             >
             wardrobe
             </a>
             <a
                 class="add-button"
-                href="add-garment.html"
+                href="{{ url_for('add') }}"
                 aria-label="Add a garment"
             >
                 +
             </a>
-            <a href="#outfits">
+            <a href="{{ url_for('outfits_page') }}">
                 outfits
             </a>
-            <a href="#circularity">
+            <a href="{{ url_for('circularity') }}">
                 circularity
             </a>
 
         </nav>
     </footer>
+
+    <script>
+        function toggleEdit() {
+            const viewMode = document.getElementById('view-mode');
+            const editMode = document.getElementById('edit-mode');
+
+            if (viewMode.style.display === 'none'){
+                viewMode.style.display = 'block';
+                editMode.style.display = 'none';
+            }
+            else {
+                viewMode.style.display = 'none';
+                editMode.style.display = 'block';
+            }
+        }
+    </script>
 </body>
 </html>

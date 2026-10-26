@@ -3,7 +3,7 @@ import os
 import uuid
 from werkzeug.utils import secure_filename
 from datetime import datetime, timezone, timedelta
-from flask import Flask, render_template, request, redirect, url_for, abort
+from flask import Flask, render_template, request, redirect, url_for, abort, jsonify
 from db.src.clothing_db import (
     get_all_clothing,
     get_clothing,
@@ -22,6 +22,8 @@ from db.src.circularity_db import get_circularity_dashboard, update_care_status,
 from db.src.styling import get_outfits
 from db.src.outfit import get_featured_outfits, get_outfits_for_weather
 from db.src.database import db
+from bson.objectid import ObjectId
+from db.src.circularity_db import get_circularity_dashboard, update_care_status
 
 
 #required HTML template
@@ -80,6 +82,7 @@ def _read_clothing_form(form):
     brand = (form.get("brand") or "").strip() or None
     name = (form.get("name") or "").strip() or None
     category = (form.get("category") or "").strip().lower() or None
+    material = [m.strip().lower() for m in (form.get("material") or "").split(",") if m.strip()]
     raw_warm = form.get("warmth_level")
 
     try:
@@ -100,6 +103,7 @@ def _read_clothing_form(form):
         "brand": brand,
         "name": name,
         "category": category,
+        "material" : material,
         "warmth_level": warmth,
     }
     if warmth not in WARMTH_CHOICES:
@@ -120,7 +124,8 @@ def home():
     outfits = {}
     if weather and request.args.get("generate")=="true":
         try:
-            outfits=get_featured_outfits(weather)
+            featured=get_featured_outfits(weather)
+            outfits = {k: serialize_document(v) for k,v in featured.items() if v is not None}
         except Exception as e:
             print(f"Failed to generate outfits: {e}")
     return render_template("index.html", weather=weather, error=error, outfits=outfits)
@@ -153,7 +158,8 @@ def mood():
         except WeatherError:
             weather = {"temperature_fahrenheit": 70, "feels_like_fahrenheit": 70}
 
-        mood_outfits = get_outfits(weather, limit=5, quiz_answers=quiz_answers)
+        looks = get_outfits(weather, limit=5, quiz_answers=quiz_answers)
+        mood_outfits = [serialize_document(look) for look in looks]
         favorites = list(db.favorite_outfits.find({}))
 
         return render_template("outfits.html", favorites=favorites, mood_outfits=mood_outfits)
@@ -164,9 +170,35 @@ def favorites():
     items = [serialize_document(i) for i in get_favorite_clothing()]
     return render_template("wardrobe.html", items=items)
 
+@app.route("/save_favorite", methods=["POST"])
+def save_favorite():
+    try:
+        data = request.json
+        if data:
+            data.pop("_id", None)
+            db.favorite_outfits.insert_one(data)
+            return jsonify({"success": True}), 200
+    except Exception as e:
+        print(f"Error saveing favorite: {e}")
+        return jsonify({"success": False}), 500
+    return jsonify({"success": False}), 400
+
+@app.route("/delete_favorite/<favorite_id>", methods=["POST"])
+def delete_favorite(favorite_id):
+    try:
+        result = db.favorite_outfits.delete_one({"_id": ObjectId(favorite_id)})
+        if result.deleted_count == 1:
+            return jsonify({"success": True}), 200
+        else:
+            return jsonify({"success": False, "error": "Nod found"}), 404
+    except Exception as e:
+        print(f"Error deleting favorite: {e}")
+        return jsonify({"success": False}), 500
+
+
 @app.route("/outfits")
 def outfits_page():
-    favorites = list(db.favorite_outfits.find({}))
+    favorites = [serialize_document(f) for f in db.favorite_outfits.find({})]
     return render_template("outfits.html", favorites=favorites)
 
 @app.route("/history")
@@ -193,10 +225,29 @@ def wear(item_id):
         abort(404)
     try:
         add_history([item_id], event_type="worn")
+        update_care_status(item_id, "needs-wash")
     except (KeyError, ValueError):
         abort(404)
 
     return redirect(url_for("show_wardrobe"))
+
+@app.route("/wash/<item_id>", methods=["POST"])
+def wash_item(item_id):
+    if get_clothing(item_id) is None:
+        abort(404)
+    try:
+        update_care_status(item_id, "ready")
+    except(KeyError, ValueError):
+        abort(404)
+    return redirect( url_for("circularity"))
+
+@app.route("/wash_all", methods=["POST"])
+def wash_all():
+    items = get_all_clothing()
+    for item in items:
+        if item.get("care_status") == "needs-wash":
+            update_care_status(str(item["_id"]), "ready")
+    return redirect(url_for("circularity"))
 
 
 @app.route("/add", methods=["GET", "POST"])
