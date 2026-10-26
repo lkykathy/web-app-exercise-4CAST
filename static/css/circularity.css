@@ -22,8 +22,6 @@
     font-size: 17px;
     margin: 14px 12px;
 }
-
-
 .summary-stats{
     display: grid;
     grid-template-columns: 1fr 1fr;
