@@ -149,13 +149,13 @@ def build_outfits(candidates, *, weather, limit=5, quiz_answers=None):
     low, high = get_warmth_range(effective, unit=args["unit"])
     ideal = (low+high) / 2
     groups = {key: [] for key in {"tops", "bottoms", "shoes", "outerwear", "accessories"}}
-    weather_score = {}
+    item_weather_scores = {}
     for item in candidates:
         main = item.get("main_category") or CATEGORY_TO_MAIN.get(item.get("category"))
         if main not in groups or item.get("is_available") is False:
             continue
         suit = get_weather_suit(item, **args)
-        weather_score[str(item["_id"])] = suit["score"]
+        item_weather_scores[str(item["_id"])] = suit["score"]
         groups[main].append(item)
     pool = {}
     for top, bottom, shoes, accessory, outerwear in product(
@@ -173,7 +173,7 @@ def build_outfits(candidates, *, weather, limit=5, quiz_answers=None):
         pool[signature] = dict(id=look_id, item_ids=ids, items=[dict(color=r, item=i) for r,i in parts],
                                relationship=relationship, score_breakdown=dict(weather=round(look_weather_score, 2),
                                                                                color=color_score,
-                                                                               penalty=mismatch_penalty,
+                                                                               weather_penalty=mismatch_penalty,
                                                                                completeness=15))
         if rules is not None:
             quiz_score, quiz_breakdown = score_quiz(parts, rules)
